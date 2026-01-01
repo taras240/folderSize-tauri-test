@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Tauri File Explorer</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+
+<body>
+
+  <div class="app">
+    <div class="app-header">
+      <div class="header__controls-container">
+        <button id="control-back" class="header-control control-button back-button">
+          <i class="svg-icon back-icon"></i>
+        </button>
+        <button id="control-forvard" class="header-control control-button forward-button">
+          <i class="svg-icon forward-icon"></i>
+        </button>
+        <button id="control-home" class="header-control control-button home-button">
+          <i class="svg-icon home-icon"></i>
+        </button>
+      </div>
+      <input id="path" class="header-control header__file-path" value="C:\\" />
+      <button id="load" class="header-control folder-size-button" title="show folder size">
+        <i class="svg-icon folder_info-icon"></i>
+      </button>
+    </div>
+
+    <ul id="list" class="files-list"></ul>
+    <div id="status-line" class="status-line">Status</div>
+  </div>
+
+
+  <script src="main.js" type="module"></script>
+
+</body>
+
+</html>

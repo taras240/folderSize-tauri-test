@@ -1,0 +1,30 @@
+.svg-icon {
+    font-size: inherit;
+    display: inline-block;
+    height: 1em;
+    aspect-ratio: 1;
+    background: var(--font-color);
+    mask-size: contain;
+    mask-position: center;
+    mask-repeat: no-repeat;
+}
+
+.back-icon {
+    mask-image: url(../assets/icons/arrow_back.svg);
+}
+
+.forward-icon {
+    mask-image: url(../assets/icons/arrow_forward.svg);
+}
+
+.home-icon {
+    mask-image: url(../assets/icons/home.svg);
+}
+
+.folder_info-icon {
+    mask-image: url(../assets/icons/folder_info.svg);
+}
+
+.delete-icon {
+    mask-image: url(../assets/icons/delete.svg);
+}

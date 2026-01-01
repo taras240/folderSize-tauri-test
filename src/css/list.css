@@ -1,0 +1,125 @@
+.folder__list-item {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background-color: white;
+    border: 1px solid transparent;
+    border-bottom: 1px dotted black;
+    cursor: pointer;
+    transition: background-color 150ms;
+}
+
+.folder__list-item:nth-child(even) {
+    background-color: #efefef;
+}
+
+.folder__list-item:hover {
+    background-color: rgb(101, 255, 255) !important;
+}
+
+.folder__list-item[data-type="folder"] {
+    background-color: #fbffb6;
+}
+
+.folder__list-item[data-type="folder"]:nth-child(even) {
+    background-color: rgb(243 232 166)
+}
+
+.list-item__column {
+    flex-basis: 5rem;
+}
+
+.list-item__column.list-item__icon {
+    flex-basis: 1rem;
+    height: 1rem;
+    aspect-ratio: 1;
+    background: red;
+}
+
+.list-item__column.list-item__title {
+    /* flex-grow: 1; */
+    /* flex-shrink: 1; */
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    flex-basis: auto;
+}
+
+.list-item__space {
+    flex: 1 1 auto;
+}
+
+.list-item__size {
+    text-align: right;
+}
+
+.list-item__file-type {
+    text-transform: uppercase;
+    flex-basis: 3rem;
+    text-align: start;
+}
+
+.text-badge {
+    --badge-bg: aquamarine;
+    --font-color: black;
+    padding: 0 0.25rem;
+    font-size: 0.9rem;
+    background: var(--badge-bg);
+    color: var(--font-color);
+    border-radius: 2px;
+    border: 1px solid var(--font-color);
+}
+
+.list-item__size.size-7 .text-badge {
+    --badge-bg: red;
+}
+
+.list-item__size.size-6 .text-badge {
+    --badge-bg: rgb(228, 148, 74);
+}
+
+.list-item__size.size-5 .text-badge {
+    --badge-bg: rgb(203, 223, 90);
+}
+
+.list-item__size.size-4 .text-badge {
+    --badge-bg: rgb(123, 255, 0);
+}
+
+.list-item__size.size-3 .text-badge {
+    --badge-bg: rgb(9, 255, 0);
+}
+
+.list-item__size.size-2 .text-badge {
+    --badge-bg: rgb(216, 240, 221);
+}
+
+.list-item__size.size-1 .text-badge {
+    --badge-bg: rgb(255, 255, 255);
+}
+
+.list-item__button-container {
+    flex-basis: 1.5rem;
+    flex-shrink: 0;
+}
+
+.list-item__button {
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: transparent;
+    transition: border-color 150ms, background 150ms;
+
+}
+
+.list-item__button:hover {
+    border-color: black;
+    background: white;
+}
+
+.list-item__button:active {
+    background: rgb(182, 182, 182);
+}
