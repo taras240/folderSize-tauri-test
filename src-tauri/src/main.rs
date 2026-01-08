@@ -7,6 +7,8 @@ use tauri::command;
 
 mod disks;
 use disks::*;
+mod net;
+use net::*;
 
 #[derive(serde::Serialize)]
 struct DirEntry {
@@ -100,7 +102,8 @@ fn main() {
             list_disks,
             delete_path,
             play,
-            stop
+            stop,
+            fetch_site
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,26 +1,50 @@
-const { invoke } = window.__TAURI__.core;
-export const listElement = (item) => {
-    const { name, is_dir, is_file, is_symlink, size, modified, readonly, hidden, } = item;
+import { LIST_ITEM_TYPES } from "./enums/listItems.js";
+import { fromHtml } from "./functions/html.js";
+import { deletePath } from "./functions/listFuncs.js";
 
+
+
+export const listElement = (item) => {
+
+    switch (item.type) {
+        case LIST_ITEM_TYPES.DRIVE:
+            return driveElement(item);
+        case LIST_ITEM_TYPES.FILE:
+            return fileElement(item);
+        case LIST_ITEM_TYPES.FOLDER:
+            return folderElement(item);
+        default:
+            return;
+    }
+}
+const folderElement = (item) => {
+    const { name, size, modified, readonly, hidden, path } = item;
     const li = document.createElement("li");
-    li.dataset.type = is_dir ? fileTypes.folder : is_file ? fileTypes.file : fileTypes.link;
+    li.dataset.type = LIST_ITEM_TYPES.FOLDER;
     li.classList.add("folder__list-item");
     li.innerHTML = fileHtml(item);
     li.querySelector(".delete-button")?.addEventListener("click", async (e) => {
         e.stopPropagation();
-        console.log("delete:", item.path);
-        try {
-            await invoke("delete_path", ({ path: item.path }));
-            li.remove()
-        } catch (e) {
-            console.warn(e);
-        }
-
+        await deletePath(path);
+        li.remove();
+    })
+    return li;
+}
+const fileElement = (item) => {
+    const { name, size, modified, readonly, hidden, path } = item;
+    const li = document.createElement("li");
+    li.dataset.type = LIST_ITEM_TYPES.FILE;
+    li.classList.add("folder__list-item");
+    li.innerHTML = fileHtml(item);
+    li.querySelector(".delete-button")?.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        await deletePath(path);
+        li.remove();
     })
     return li;
 }
 export const driveElement = (drive) => {
-    const { name, total, available, mount_point } = drive;
+    const { name, total, available, path } = drive;
 
     const li = document.createElement("li");
     li.dataset.type = "drive";
@@ -30,12 +54,10 @@ export const driveElement = (drive) => {
     return li;
 }
 const fileHtml = (item) => {
-    const { name, is_dir, is_file, is_symlink, size, modified, readonly, hidden, } = item;
+    const { name, normalizedName, is_dir, is_file, is_symlink, size, modifiedDate, readonly, hidden, type, fileType } = item;
     const normalizedSize = getNormalizedSize(size);
     const sizeClass = getSizeClass(size);
-    const fileType = getFileType(item);
-    const normalizedDate = new Date(modified).toLocaleDateString();
-    const normalizedName = is_file ? name.replace(/\.([a-z0-9.]+)$/i, "") : name;
+
     return `
         ${fileTypeHtml(fileType)}
         ${normalizedSize ? sizeHtml(normalizedSize, sizeClass) : ""}
@@ -44,7 +66,7 @@ const fileHtml = (item) => {
         <div class="list-item__column list-item__title">${normalizedName}</div>
         
         <div class="list-item__space"></div>
-        <div class="list-item__column list-item__date text-badge">${normalizedDate}</div>
+        <div class="list-item__column list-item__date text-badge">${modifiedDate}</div>
         <div class="list-item__column list-item__button-container">
             <button class="list-item__button delete-button">
                 <i class="svg-icon delete-icon"></i>
@@ -53,7 +75,7 @@ const fileHtml = (item) => {
     `;
 }
 const driveHtml = (drive) => {
-    const { name, total, available, mount_point } = drive;
+    const { name, total, available, path } = drive;
     const normalizedSize = getNormalizedSize(total);
     const normalizedAvailableSize = getNormalizedSize(available);
 
@@ -61,7 +83,7 @@ const driveHtml = (drive) => {
     return `
         ${fileTypeHtml(fileType)}
         ${sizeHtml(`${normalizedSize}[${normalizedAvailableSize}]`)}
-        <div class="list-item__column list-item__title">[${name}] ${mount_point} </div>
+        <div class="list-item__column list-item__title">[${name}] ${path} </div>
         <div class="list-item__space"></div>
     `;
 }
@@ -86,17 +108,8 @@ const getSizeClass = (size) => {
     if (size > 1e6) return "size-2";
     return "size-1";
 }
-export const getFileType = (file) => {
-    const { name, is_dir, is_file, is_symlink } = file;
-    if (is_dir) return "dir";
-    if (is_symlink) return "lnk";
-    else return name.includes(".") ? name.split(".").pop() : "?unk";
-}
-const fileTypes = {
-    folder: "folder",
-    file: "file",
-    link: "link"
-}
+
+
 const textBadgeHtml = (text) => `
         <i class="text-badge">${text}</i>
     `;

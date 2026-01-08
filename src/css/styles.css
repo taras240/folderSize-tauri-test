@@ -53,6 +53,7 @@
   display: flex;
   flex-direction: row;
   gap: 0.5rem;
+  width: 100%;
 }
 
 .header-control {
@@ -81,6 +82,7 @@
 }
 
 .files-list {
+  position: relative;
   --font-color: black;
   flex: 1;
   width: 100%;
