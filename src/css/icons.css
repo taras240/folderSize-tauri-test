@@ -21,6 +21,10 @@
     mask-image: url(../assets/icons/home.svg);
 }
 
+.refresh-icon {
+    mask-image: url(../assets/icons/refresh.svg);
+}
+
 .folder_info-icon {
     mask-image: url(../assets/icons/folder_info.svg);
 }

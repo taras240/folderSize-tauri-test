@@ -3,27 +3,29 @@
     flex-direction: row;
     gap: 0.5rem;
     padding: 0.25rem 0.5rem;
-    background-color: white;
+    background-color: transparent;
+    color: var(--font-color);
     border: 1px solid transparent;
-    border-bottom: 1px dotted black;
+    /* border-bottom: 1px dotted black; */
     cursor: pointer;
     transition: background-color 150ms;
 }
 
 .folder__list-item:nth-child(even) {
-    background-color: #efefef;
+    background-color: rgba(68, 68, 68, 0.1);
 }
 
 .folder__list-item:hover {
-    background-color: rgb(101, 255, 255) !important;
+    background-color: var(--selection-color) !important;
+    border-color: var(--accent-color) transparent var(--accent-color) transparent;
 }
 
 .folder__list-item[data-type="folder"] {
-    background-color: #fbffb6;
+    background-color: rgba(251, 255, 182, 0.05);
 }
 
 .folder__list-item[data-type="folder"]:nth-child(even) {
-    background-color: rgb(243 232 166)
+    background-color: rgba(251, 255, 182, 0.1);
 }
 
 .list-item__column {
@@ -61,14 +63,24 @@
 }
 
 .text-badge {
-    --badge-bg: aquamarine;
-    --font-color: black;
+    --badge-bg: var(--selection-color);
+    /* --font-color: white; */
     padding: 0 0.25rem;
     font-size: 0.9rem;
     background: var(--badge-bg);
     color: var(--font-color);
     border-radius: 2px;
-    border: 1px solid var(--font-color);
+    border: 1px solid transparent;
+}
+
+.list-item__size {}
+
+.list-item__size.size-0 .text-badge {
+    /* --font-color: white; */
+}
+
+.list-item__size .text-badge {
+    --font-color: black;
 }
 
 .list-item__size.size-7 .text-badge {
@@ -116,10 +128,10 @@
 }
 
 .list-item__button:hover {
-    border-color: black;
-    background: white;
+    border-color: transparent;
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .list-item__button:active {
-    background: rgb(182, 182, 182);
+    background: rgba(255, 255, 255, 0.1);
 }

@@ -16,6 +16,8 @@ const headerControls = () => {
         backButton,
         buttons.forward({ id: "control-forvard" }),
         buttons.home({ id: "control-home" }),
+        buttons.refresh({ id: "control-refresh" }),
+
         curentPathPanel({ id: "path" }),
         buttons.folderSize({ id: "control-show-size" })
     )

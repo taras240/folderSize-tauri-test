@@ -19,6 +19,7 @@ export class UI {
     generateUI() {
         this.app.innerHTML = "";
         this.header = headerElement();
+        this.path = this.header.querySelector("#path");
         this.list = mainList();
         this.status = statusLine();
         this.app.append(this.header, this.list, this.status);
@@ -27,6 +28,7 @@ export class UI {
         this.app.querySelector("#control-back").addEventListener("click", () => this.goto(GO_TO_DIRECTIONS.BACK));
         this.app.querySelector("#control-forvard").addEventListener("click", () => this.goto(GO_TO_DIRECTIONS.FORWARD));
         this.app.querySelector("#control-home").addEventListener("click", () => this.goto(GO_TO_DIRECTIONS.HOME));
+        this.app.querySelector("#control-refresh").addEventListener("click", () => this.openFolder(this.curPath));
         this.app.querySelector("#control-show-size").addEventListener("click", () => this.showSize());
     }
     async goto(path) {
@@ -85,9 +87,11 @@ export class UI {
         })
     }
     async openFolder(path) {
+        path ??= GO_TO_DIRECTIONS.HOME;
         this.list.innerHTML = "";
+        this.path.value = path;
         let items = [];
-        if (!path || path === GO_TO_DIRECTIONS.HOME) {
+        if (path === GO_TO_DIRECTIONS.HOME) {
             items = await getDrives();
         }
         else {
@@ -106,7 +110,7 @@ export class UI {
         return items.sort((a, b) => b.size - a.size).sort((a, b) => b.is_dir - a.is_dir);
     }
     updateSizeCache(cache) {
-        this.sizeCache = cache;
+        this.sizeCache = Object.assign(this.sizeCache, cache);
         this.openFolder(this.curPath);
     }
     updateStatus(log) {

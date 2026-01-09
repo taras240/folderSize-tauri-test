@@ -82,7 +82,7 @@ const driveHtml = (drive) => {
     const fileType = "drive";
     return `
         ${fileTypeHtml(fileType)}
-        ${sizeHtml(`${normalizedSize}[${normalizedAvailableSize}]`)}
+        ${textBadgeHtml(`${normalizedSize}[${normalizedAvailableSize}]`)}
         <div class="list-item__column list-item__title">[${name}] ${path} </div>
         <div class="list-item__space"></div>
     `;
@@ -113,8 +113,8 @@ const getSizeClass = (size) => {
 const textBadgeHtml = (text) => `
         <i class="text-badge">${text}</i>
     `;
-const sizeHtml = (size, sizeClass) => `
-        <div class="list-item__column list-item__size ${sizeClass}">
+const sizeHtml = (size, sizeClass, is_drive) => `
+        <div class="list-item__column list-item__size ${sizeClass || "size-0"}">
             ${textBadgeHtml(size)}
         </div>
     `;

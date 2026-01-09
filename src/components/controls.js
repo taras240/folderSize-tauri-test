@@ -16,6 +16,11 @@ const buttonsHtml = {
         classList: ["header-control", "control-button", "home-button", ...classList],
         iconHtml: iconsHtml.home
     }),
+    refresh: ({ id, classList = [] }) => iconButton({
+        id,
+        classList: ["header-control", "control-button", "refresh-button", ...classList],
+        iconHtml: iconsHtml.refresh
+    }),
     folderSize: ({ id, classList = [] }) => iconButton({
         id,
         classList: ["header-control", "control-button", "folder-size-button", ...classList],
@@ -26,6 +31,8 @@ export const buttons = {
     back: ({ id, classList = [] }) => fromHtml(buttonsHtml.back({ id, classList })),
     forward: ({ id, classList = [] }) => fromHtml(buttonsHtml.forward({ id, classList })),
     home: ({ id, classList = [] }) => fromHtml(buttonsHtml.home({ id, classList })),
+    refresh: ({ id, classList = [] }) => fromHtml(buttonsHtml.refresh({ id, classList })),
+
     folderSize: ({ id, classList = [] }) => fromHtml(buttonsHtml.folderSize({ id, classList })),
 }
 const iconButton = ({ id, classList, iconHtml }) => {
@@ -40,6 +47,8 @@ const iconsHtml = {
     back: iconTemplate("back"),
     forward: iconTemplate("forward"),
     home: iconTemplate("home"),
+    refresh: iconTemplate("refresh"),
+
     folderInfo: iconTemplate("folder_info"),
 }
 export const curentPathPanel = ({ id }) => fromHtml(`
