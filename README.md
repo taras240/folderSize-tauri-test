@@ -1,7 +1,2 @@
-# Tauri + Vanilla
+<img width="814" height="638" alt="зображення" src="https://github.com/user-attachments/assets/2887006f-365d-4dd2-9c3e-5bac779753d5" />
 
-This template should help get you started developing with Tauri in vanilla HTML, CSS and Javascript.
-
-## Recommended IDE Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
