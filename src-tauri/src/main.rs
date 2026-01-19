@@ -1,14 +1,15 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
+use std::env;
 use std::fs;
 use std::path::Path;
 use std::time::UNIX_EPOCH;
-use tauri::command;
 
 mod disks;
 use disks::*;
 mod net;
 use net::*;
+mod metadata;
+use metadata::*;
 
 #[derive(serde::Serialize)]
 struct DirEntry {
@@ -22,10 +23,59 @@ struct DirEntry {
     hidden: bool,
     path: String,
 }
+#[tauri::command]
+fn parse_env_path(path: &str) -> String {
+    let mut result = path.to_string();
+
+    for (key, value) in env::vars() {
+        let needle = format!("%{}%", key);
+        if result.contains(&needle) {
+            result = result.replace(&needle, &value);
+        }
+    }
+
+    result
+}
+
+use std::collections::HashMap;
 
 #[tauri::command]
-fn list_dir(path: String) -> Result<Vec<DirEntry>, String> {
-    let entries = match fs::read_dir(&path) {
+async fn calc_folder_sizes(path: String) -> Result<HashMap<String, u64>, String> {
+    let mut sizes: HashMap<String, u64> = HashMap::new();
+    calc_recursive(&path, &mut sizes)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(sizes)
+}
+
+async fn calc_recursive(
+    path: &str,
+    sizes: &mut HashMap<String, u64>,
+) -> Result<u64, Box<dyn std::error::Error>> {
+    // Викликаємо вашу наявну функцію
+    let entries = list_dir(path.to_owned()).await?;
+    let mut total_size: u64 = 0;
+
+    for entry in entries {
+        if entry.is_dir {
+            // Рекурсивно обчислюємо розмір підпапки
+            let subfolder_size = Box::pin(calc_recursive(&entry.path, sizes)).await?;
+            total_size += subfolder_size;
+        } else if let Some(file_size) = entry.size {
+            // Додаємо розмір файлу
+            total_size += file_size;
+        }
+    }
+
+    // Зберігаємо розмір цієї папки
+    sizes.insert(path.to_string(), total_size);
+    Ok(total_size)
+}
+
+#[tauri::command]
+async fn list_dir(path: String) -> Result<Vec<DirEntry>, String> {
+    let real_path = parse_env_path(&path);
+    let entries = match fs::read_dir(real_path) {
         Ok(e) => e,
         Err(_) => return Ok(vec![]), // ❗ нема доступу → порожній список
     };
@@ -42,11 +92,11 @@ fn list_dir(path: String) -> Result<Vec<DirEntry>, String> {
             Ok(m) => m,
             Err(_) => continue,
         };
+
         let full_path = fs::canonicalize(entry.path())
             .unwrap_or(entry.path())
             .to_string_lossy()
             .replace(r"\\?\", "");
-        // .to_string();
 
         result.push(DirEntry {
             name: entry.file_name().to_string_lossy().to_string(),
@@ -67,7 +117,6 @@ fn list_dir(path: String) -> Result<Vec<DirEntry>, String> {
 
     Ok(result)
 }
-
 #[tauri::command]
 fn delete_path(path: String) -> Result<(), String> {
     let path = Path::new(&path);
@@ -94,16 +143,19 @@ fn play(path: String) -> Result<(), String> {
 fn stop() {
     player::stop();
 }
-
+use tauri::Manager;
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             list_dir,
             list_disks,
             delete_path,
-            play,
-            stop,
-            fetch_site
+            // play,
+            // stop,
+            fetch_site,
+            get_metadata,
+            parse_env_path,
+            calc_folder_sizes
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

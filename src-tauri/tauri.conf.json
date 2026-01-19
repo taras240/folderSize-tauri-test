@@ -4,19 +4,42 @@
   "version": "0.1.0",
   "identifier": "com.khomy.test-app",
   "build": {
-    "frontendDist": "../src"
+    "frontendDist": "../dist",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://localhost:1420"
+  },
+  "plugins": {
+    "fs": {
+      "scope": [
+        "**"
+      ]
+    },
+    "dialog": {
+      "scope": [
+        "**"
+      ]
+    }
   },
   "app": {
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "test-app",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "title": "X@rT Explorer",
+        "decorations": true,
+        "transparent": true
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": [
+          "**"
+        ]
+      }
     }
   },
   "bundle": {

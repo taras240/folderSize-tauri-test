@@ -2,7 +2,7 @@ import { ui } from "../../main.js";
 import { LIST_ITEM_TYPES } from "../enums/listItems.js";
 
 
-const { invoke } = window.__TAURI__.core;
+import { invoke } from '@tauri-apps/api/core';
 
 
 
@@ -16,7 +16,7 @@ export const getDrives = async () => {
     // },...]
     return disks?.map(d => ({ ...d, type: LIST_ITEM_TYPES.DRIVE }));
 }
-export const getFolderItems = async (path, sizeCache) => {
+export const getFolderItems = async (path, sizeCache = {}) => {
     const getType = ({ is_dir, is_file, is_symlink, is_drive }) => {
         if (is_drive) return LIST_ITEM_TYPES.DRIVE;
         if (is_symlink) return LIST_ITEM_TYPES.LINK;
@@ -32,7 +32,9 @@ export const getFolderItems = async (path, sizeCache) => {
         else return name.includes(".") ? name.split(".").pop() : "?unk";
     }
     if (path) {
+        console.log(path, typeof path)
         const items = (await invoke("list_dir", { path }));
+        // console.log(path, items)
         const normalizedItems = items.map((item) => {
             const { is_dir, is_file, is_symlink, is_drive, name, modified, path } = item;
 
@@ -72,13 +74,17 @@ export const deletePath = async (path) => {
 }
 
 export const doSizeCache = async ({ path, onUpdate, onFinish }) => {
-    console.log(path, onFinish, onUpdate)
-    const sizeCache = {};
-    onUpdate(`Scan size: ${path}`);
-    const size = await getFolderSize(path, sizeCache, onUpdate);
-    sizeCache[path] = size;
-    onUpdate(`OK`);
+    onUpdate(` Calculating size: "${path}" ...`);
+    const sizeCache = await invoke("calc_folder_sizes", { path });
+    onUpdate(` Calculated: "${path}"`);
     onFinish(sizeCache);
+
+    // const sizeCache = {};
+    // onUpdate(`Scan size: ${path}`);
+    // const size = await getFolderSize(path, sizeCache, onUpdate);
+    // sizeCache[path] = size;
+    // onUpdate(`OK`);
+    // onFinish(sizeCache);
 
 }
 const getFolderSize = async (folderPath, sizeCache, onUpdate) => {

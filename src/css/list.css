@@ -9,23 +9,36 @@
     /* border-bottom: 1px dotted black; */
     cursor: pointer;
     transition: background-color 150ms;
+    user-select: none;
 }
 
 .folder__list-item:nth-child(even) {
-    background-color: rgba(68, 68, 68, 0.1);
+    background-color: var(--file-bg-even);
 }
 
 .folder__list-item:hover {
     background-color: var(--selection-color) !important;
-    border-color: var(--accent-color) transparent var(--accent-color) transparent;
+    border-color: var(--accent-color) var(--accent-color);
+}
+
+.folder__list-item.played {
+
+    background-color: var(--selection-color) !important;
+    border-left: 3px solid var(--accent-color);
+
+}
+
+.folder__list-item.played .list-item__title {
+    color: var(--active-color);
+    font-weight: bold;
 }
 
 .folder__list-item[data-type="folder"] {
-    background-color: rgba(251, 255, 182, 0.05);
+    background-color: var(--folder-bg);
 }
 
 .folder__list-item[data-type="folder"]:nth-child(even) {
-    background-color: rgba(251, 255, 182, 0.1);
+    background-color: var(--folder-bg-even);
 }
 
 .list-item__column {

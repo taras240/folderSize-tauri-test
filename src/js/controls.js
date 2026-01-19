@@ -26,6 +26,11 @@ const buttonsHtml = {
         classList: ["header-control", "control-button", "folder-size-button", ...classList],
         iconHtml: iconsHtml.folderInfo
     }),
+    sort: ({ id, classList = [] }) => iconButton({
+        id,
+        classList: ["header-control", "control-button", "sort-list-button", ...classList],
+        iconHtml: iconsHtml.sort
+    }),
 }
 export const buttons = {
     back: ({ id, classList = [] }) => fromHtml(buttonsHtml.back({ id, classList })),
@@ -34,6 +39,7 @@ export const buttons = {
     refresh: ({ id, classList = [] }) => fromHtml(buttonsHtml.refresh({ id, classList })),
 
     folderSize: ({ id, classList = [] }) => fromHtml(buttonsHtml.folderSize({ id, classList })),
+    sort: ({ id, classList = [] }) => fromHtml(buttonsHtml.sort({ id, classList })),
 }
 const iconButton = ({ id, classList, iconHtml }) => {
     return `
@@ -43,20 +49,25 @@ const iconButton = ({ id, classList, iconHtml }) => {
     `
 }
 const iconTemplate = (iconName) => `<i class="svg-icon ${iconName}-icon"></i>`;
-const iconsHtml = {
+export const iconsHtml = {
     back: iconTemplate("back"),
     forward: iconTemplate("forward"),
     home: iconTemplate("home"),
     refresh: iconTemplate("refresh"),
 
     folderInfo: iconTemplate("folder_info"),
+
+    play_audio: iconTemplate("play_audio"),
+    next_audio: iconTemplate("next_audio"),
+    prev_audio: iconTemplate("prev_audio"),
+    sort: iconTemplate("sort"),
 }
 export const curentPathPanel = ({ id }) => fromHtml(`
           <input id="${id}" class="header-control header__file-path" value="C:\\" />
     `)
 
 export const statusLine = () => fromHtml(`
-    <div id="status-line" class="status-line">Status</div>
+    <div id="status-line" class="status-line"></div>
     `)
 
 

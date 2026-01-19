@@ -32,3 +32,23 @@
 .delete-icon {
     mask-image: url(../assets/icons/delete.svg);
 }
+
+.play_audio-icon {
+    mask-image: url(../assets/icons/play.svg);
+}
+
+.pause_audio-icon {
+    mask-image: url(../assets/icons/pause.svg);
+}
+
+.next_audio-icon {
+    mask-image: url(../assets/icons/next_audio.svg);
+}
+
+.prev_audio-icon {
+    mask-image: url(../assets/icons/prev_audio.svg);
+}
+
+.sort-icon {
+    mask-image: url(../assets/icons/sort.svg);
+}

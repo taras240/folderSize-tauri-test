@@ -1,5 +1,5 @@
 
-const { invoke } = window.__TAURI__.core;
+import { invoke } from '@tauri-apps/api/core';
 
 export const fetchUrl = async (url) => {
     url ??= "https://api.loe.lviv.ua/api/menus?page=1&type=photo-grafic";
