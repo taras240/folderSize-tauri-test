@@ -9,42 +9,44 @@ await appWindow.setEffects({
 });
 let originalSize = null;
 let isResizing = false;
+const hideWebviewTitle = (appWindow) => {
+    // Збережіть початковий розмір
+    appWindow.innerSize().then(size => {
+        originalSize = size;
+    });
 
-// Збережіть початковий розмір
-appWindow.innerSize().then(size => {
-    originalSize = size;
-});
 
+    appWindow.onFocusChanged(async ({ payload: focused }) => {
+        if (true || (focused && !isResizing)) {
+            isResizing = true;
 
-appWindow.onFocusChanged(async ({ payload: focused }) => {
-    if (true || (focused && !isResizing)) {
-        isResizing = true;
-
-        // Використовуємо збережений розмір
-        if (originalSize) {
-            await appWindow.setSize({
-                type: "Physical",
-                width: originalSize.width,
-                height: originalSize.height
-            });
-
-            setTimeout(async () => {
+            // Використовуємо збережений розмір
+            if (originalSize) {
                 await appWindow.setSize({
                     type: "Physical",
                     width: originalSize.width,
                     height: originalSize.height
                 });
-                isResizing = false;
-            }, 10);
-        }
-    }
-});
 
-appWindow.listen('tauri://resize', async () => {
-    if (!isResizing) {
-        originalSize = await appWindow.innerSize();
-    }
-});
+                setTimeout(async () => {
+                    await appWindow.setSize({
+                        type: "Physical",
+                        width: originalSize.width,
+                        height: originalSize.height
+                    });
+                    isResizing = false;
+                }, 10);
+            }
+        }
+    });
+
+    appWindow.listen('tauri://resize', async () => {
+        if (!isResizing) {
+            originalSize = await appWindow.innerSize();
+        }
+    });
+}
+
 
 export const ui = new UI();
 window.ui = ui;

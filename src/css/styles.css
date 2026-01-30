@@ -16,7 +16,7 @@
   --accent-color: rgb(15, 108, 189);
   --active-color: rgb(0, 136, 255);
   --selection-color: rgb(15, 108, 189, 0.2);
-  --header-color: rgb(32, 32, 32);
+  --header-color: rgb(255, 255, 255);
   --hover-button-background: rgba(149, 149, 149, 0.2);
   --control-border-radius: 3px;
   --folder-bg: rgba(251, 255, 182, 0.2);
@@ -39,7 +39,7 @@
     --accent-color: rgb(15, 108, 189);
     --active-color: rgb(0, 136, 255);
     --selection-color: rgb(15, 108, 189, 0.2);
-    --header-color: rgb(32, 32, 32);
+    --header-color: rgb(0, 0, 0);
     --hover-button-background: rgba(255, 255, 255, 0.11);
     --folder-bg: rgba(251, 255, 182, 0.1);
     --folder-bg-even: rgba(251, 255, 182, 0.2);
@@ -70,17 +70,6 @@ body {
   /* backdrop-filter: blur(10px); */
 }
 
-.window-header {
-  display: block;
-  background: var(--header-color);
-  height: 3rem;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: end;
-}
-
 .app {
   /* background: var(--main-color); */
   display: flex;
@@ -90,7 +79,6 @@ body {
 }
 
 .app-header {
-  /* background: var(--header-color); */
   display: flex;
   flex-direction: row;
   gap: 0.5rem;
@@ -102,7 +90,8 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  backdrop-filter: blur(10px);
+  /* background: var(--header-color); */
+  /* box-shadow: 0 0 3px 0 var(--header-color); */
   /* background: linear-gradient(270deg, orange, cyan, rgb(0, 255, 55)); */
   /* background-size: 400% 100%;
   animation: header-anim 10s linear infinite; */
@@ -145,6 +134,12 @@ body {
   transition: background 150ms;
 }
 
+.control-button-text {
+  font-size: 1rem;
+  font-weight: normal;
+  padding: 0 0.5rem;
+}
+
 .control-button:active {
   opacity: 0.8;
 }
@@ -166,12 +161,7 @@ input.header-control {
   padding: 0 0.5rem;
 }
 
-.files-list {
-  position: relative;
-  flex: 1;
-  width: 100%;
-  overflow-y: auto;
-}
+
 
 .status-line {
   width: 100%;
@@ -181,6 +171,18 @@ input.header-control {
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+}
+
+.status-line[data-status="busy"] {
+  color: yellow;
+}
+
+.status-line[data-status="ok"] {
+  color: greenyellow;
+}
+
+.status-line[data-status="error"] {
+  color: red;
 }
 
 .app-content {
@@ -195,11 +197,9 @@ input.header-control {
 .sidebar {
   height: 100%;
   width: 12rem;
-  /* border-right: 2px solid var(--header-color); */
 }
 
 .sidebar-container {
-  /* background: var(--header-color); */
   width: 100%;
   height: 100%;
   overflow: auto;

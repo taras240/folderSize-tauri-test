@@ -1,4 +1,4 @@
-import { fromHtml } from "./functions/html.js";
+import { fromHtml } from "../functions/html.js";
 
 export function sideBarElement() {
     return fromHtml(`

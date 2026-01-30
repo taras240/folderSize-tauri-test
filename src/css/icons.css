@@ -29,6 +29,15 @@
     mask-image: url(../assets/icons/folder_info.svg);
 }
 
+.swap_folder-icon {
+    mask-image: url(../assets/icons/folder_swap.svg);
+}
+
+.video_library-icon {
+    mask-image: url(../assets/icons/video_library.svg);
+
+}
+
 .delete-icon {
     mask-image: url(../assets/icons/delete.svg);
 }
@@ -49,6 +58,23 @@
     mask-image: url(../assets/icons/prev_audio.svg);
 }
 
+.shuffle-icon {
+    mask-image: url(../assets/icons/shuffle.svg);
+}
+
 .sort-icon {
     mask-image: url(../assets/icons/sort.svg);
+}
+
+.mute-icon {
+    mask-image: url(../assets/icons/mute.svg);
+}
+
+.volume-icon {
+    mask-image: url(../assets/icons/volume.svg);
+}
+
+.folder_list-icon {
+    mask-image: url(../assets/icons/folder_list.svg
+);
 }

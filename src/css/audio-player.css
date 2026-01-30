@@ -7,6 +7,11 @@
     /* gap: 1rem; */
     /* background: var(--header-color); */
     padding: 0.25rem;
+    overflow: hidden;
+}
+
+.audio__container.hidden {
+    display: none;
 }
 
 .audio__controls {
@@ -44,6 +49,8 @@
 
 .audio__main-content {
     flex-grow: 1;
+    min-width: 10rem;
+    flex-shrink: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -70,7 +77,9 @@
     gap: 1rem;
 }
 
-.audio__seekbar-container {
+.control__progressbar-container {
+    position: relative;
+    --completion: 0%;
     height: 1rem;
     width: 100%;
     display: grid;
@@ -78,16 +87,15 @@
     cursor: pointer;
 }
 
-.audio__seekbar {
+.control__progressbar {
     position: relative;
-    --completion: 0%;
+
     width: 100%;
     height: 3px;
     background-color: var(--selection-color);
-
 }
 
-.audio__seekbar::before {
+.control__progressbar::before {
     content: "";
     position: absolute;
     top: 0;
@@ -95,10 +103,9 @@
     height: 100%;
     width: var(--completion);
     background: var(--accent-color);
-    transition: width var(--transition-duration) linear;
 }
 
-.audio__seekbar::after {
+.control__progressbar::after {
     content: "";
     position: absolute;
     top: 50%;
@@ -111,6 +118,76 @@
     transition: height 150ms, left var(--transition-duration) linear;
 }
 
-.audio__seekbar-container:hover .audio__seekbar::after {
+.control__progressbar-hint {
+    position: absolute;
+    font-size: 0.9rem;
+    width: fit-content;
+    height: fit-content;
+    padding: 0 0.25rem;
+    border-radius: 3px;
+    background: red;
+    color: var(--main-color);
+    background: var(--font-color);
+    left: var(--mouse-x);
+    top: 0;
+    transform: translate(-50%, calc(-100%));
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 150ms;
+}
+
+.control__progressbar-container:hover .control__progressbar-hint {
+    opacity: 1;
+}
+
+.control__progressbar-hint::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    background: transparent;
+    transform: translate(-50%, 100%);
+    width: 0;
+    height: 0;
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    border-top: 3px solid var(--font-color);
+    z-index: 2;
+}
+
+.audio__volumebar-container {
+    width: 4rem;
+}
+
+.audio__seekbar-container {}
+
+.audio__seekbar {}
+
+.audio__seekbar::before {
+    transition: width var(--transition-duration) linear;
+}
+
+.audio__seekbar::after {}
+
+.control__progressbar-container:hover .control__progressbar::after {
     height: 314%;
+}
+
+.audio__shuffle-button.active {
+    position: relative;
+    opacity: 1;
+    /* border-bottom: 1px solid var(--font-color); */
+}
+
+.audio__shuffle-button.active::after {
+    position: absolute;
+    top: calc(100% - 0.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    content: "ON";
+    height: 100%;
+    width: 100%;
+    font-size: 0.6rem;
+    color: var(--font-color);
 }

@@ -1,8 +1,10 @@
-import { ui } from "../main.js";
-import { LIST_ITEM_TYPES } from "./enums/listItems.js";
-import { isAudio } from "./functions/fileFormats.js";
-import { fromHtml } from "./functions/html.js";
-import { deletePath } from "./functions/listFuncs.js";
+import { ui } from "../../main.js";
+import { LIST_ITEM_TYPES } from "../enums/listItems.js";
+import { isAudio } from "../functions/fileFormats.js";
+import { fromHtml } from "../functions/html.js";
+import { deletePath } from "../functions/listFuncs.js";
+import { invoke, convertFileSrc } from '@tauri-apps/api/core';
+import { iconsHtml } from "./icons.js";
 
 
 
@@ -49,12 +51,46 @@ const fileElement = (item) => {
             li.remove();
             console.log("delete", path)
         }
-        // else {
-        //     if (isAudio(item)) {
+        else {
+            if (isAudio(item)) {
 
-        //         ui.startPlayer(item);
-        //     }
-        // }
+                ui.startPlayer(item);
+            }
+        }
+    });
+    li.addEventListener("dblclick", async (event) => {
+        console.log(isAudio(item), item)
+
+        if (isAudio(item)) {
+
+            ui.startPlayer(item);
+        }
+
+    });
+    return li;
+}
+export const videoElement = (item) => {
+    const { name, size, modified, readonly, hidden, path, fileType } = item;
+    const li = document.createElement("li");
+    li.dataset.type = LIST_ITEM_TYPES.VIDEO;
+    li.classList.add("folder__list-item", "video-item");
+    li.dataset.name = name;
+    li.dataset.path = path;
+    li.dataset.size = size;
+    li.innerHTML = videoHtml(item);
+    li.addEventListener("click", async (event) => {
+        if (event.target.closest(".delete-button")) {
+            event.stopPropagation();
+            await deletePath(path);
+            li.remove();
+            console.log("delete", path)
+        }
+        else {
+            if (isAudio(item)) {
+
+                ui.startPlayer(item);
+            }
+        }
     });
     li.addEventListener("dblclick", async (event) => {
         console.log(isAudio(item), item)
@@ -77,6 +113,20 @@ export const driveElement = (drive) => {
 
     return li;
 }
+const videoHtml = (item) => {
+    const { name, normalizedName, is_dir, is_file, is_symlink, size, modifiedDate, readonly, hidden, type, fileType, path } = item;
+    const normalizedSize = getNormalizedSize(size);
+    return `
+        <video class="list__video-container" controls muted loop src="${convertFileSrc(path)}"></video>
+        <div class="list__video-details" title="${name}">${normalizedSize} :: ${normalizedName}</div>
+        <div class="list__video-buttons">
+            <button class="list-item__button delete-button">
+                ${iconsHtml.delete}
+            </button>
+        </div>
+        
+     `
+}
 const fileHtml = (item) => {
     const { name, normalizedName, is_dir, is_file, is_symlink, size, modifiedDate, readonly, hidden, type, fileType } = item;
     const normalizedSize = getNormalizedSize(size);
@@ -91,9 +141,9 @@ const fileHtml = (item) => {
         
         <div class="list-item__space"></div>
         <div class="list-item__column list-item__date text-badge">${modifiedDate}</div>
-        <div class="list-item__column list-item__button-container">
+        <div class="list-item__column list-item__button-container delete-button">
             <button class="list-item__button delete-button">
-                <i class="svg-icon delete-icon"></i>
+                ${iconsHtml.delete}
             </button>
         </div>
     `;

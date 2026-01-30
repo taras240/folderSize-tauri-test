@@ -3,5 +3,5 @@ export const LIST_ITEM_TYPES = Object.freeze({
     FOLDER: "folder",
     FILE: "file",
     LINK: "link",
-    DRIVE: "drive"
+    DRIVE: "drive",
 });

@@ -1,15 +1,15 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use std::env;
-use std::fs;
-use std::path::Path;
-use std::time::UNIX_EPOCH;
-
+use serde::{Deserialize, Serialize};
+use std::{env, fs, path::Path, path::PathBuf, time::UNIX_EPOCH};
+use tauri::{Manager, PhysicalPosition, PhysicalSize, WindowEvent};
+use tauri_plugin_store::StoreBuilder;
 mod disks;
 use disks::*;
 mod net;
 use net::*;
 mod metadata;
 use metadata::*;
+use trash::delete;
 
 #[derive(serde::Serialize)]
 struct DirEntry {
@@ -118,6 +118,54 @@ async fn list_dir(path: String) -> Result<Vec<DirEntry>, String> {
     Ok(result)
 }
 #[tauri::command]
+fn full_files_list(path: String) -> Result<Vec<DirEntry>, String> {
+    let real_path = parse_env_path(&path);
+
+    let entries = match fs::read_dir(real_path) {
+        Ok(e) => e,
+        Err(_) => return Ok(vec![]),
+    };
+
+    let mut result = Vec::new();
+
+    for entry in entries.flatten() {
+        let meta = match entry.metadata() {
+            Ok(m) => m,
+            Err(_) => continue,
+        };
+
+        let full_path = fs::canonicalize(entry.path())
+            .unwrap_or(entry.path())
+            .to_string_lossy()
+            .replace(r"\\?\", "");
+
+        if meta.is_dir() {
+            if let Ok(inner) = full_files_list(full_path.clone()) {
+                result.extend(inner);
+            }
+        } else {
+            result.push(DirEntry {
+                name: entry.file_name().to_string_lossy().to_string(),
+                is_dir: false,
+                is_file: true,
+                size: Some(meta.len()),
+                modified: meta
+                    .modified()
+                    .ok()
+                    .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+                    .map(|d| d.as_millis()),
+                readonly: meta.permissions().readonly(),
+                hidden: meta.is_symlink(), // ⚠️ сумнівна логіка
+                is_symlink: meta.is_symlink(),
+                path: full_path,
+            });
+        }
+    }
+
+    Ok(result)
+}
+
+#[tauri::command]
 fn delete_path(path: String) -> Result<(), String> {
     let path = Path::new(&path);
 
@@ -132,6 +180,18 @@ fn delete_path(path: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn delete_path_to_trash(path: String) -> Result<(), String> {
+    let path = Path::new(&path);
+
+    if !path.exists() {
+        return Err("Шлях не існує".into());
+    }
+
+    delete(path).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 mod player;
 
 #[tauri::command]
@@ -143,13 +203,67 @@ fn play(path: String) -> Result<(), String> {
 fn stop() {
     player::stop();
 }
-use tauri::Manager;
+#[derive(Debug, Serialize, Deserialize, Clone)]
+struct WindowState {
+    width: u32,
+    height: u32,
+    x: i32,
+    y: i32,
+    maximized: bool,
+}
+
+impl Default for WindowState {
+    fn default() -> Self {
+        Self {
+            width: 800,
+            height: 600,
+            x: 100,
+            y: 100,
+            maximized: false,
+        }
+    }
+}
+
+fn get_state_path(app: &tauri::AppHandle) -> PathBuf {
+    app.path()
+        .app_data_dir()
+        .expect("Failed to get app data dir")
+        .join("window-state.json")
+}
+
+fn load_window_state(app: &tauri::AppHandle) -> WindowState {
+    let path = get_state_path(app);
+
+    if let Ok(contents) = fs::read_to_string(&path) {
+        if let Ok(state) = serde_json::from_str(&contents) {
+            return state;
+        }
+    }
+
+    WindowState::default()
+}
+
+fn save_window_state(app: &tauri::AppHandle, state: &WindowState) {
+    let path = get_state_path(app);
+
+    if let Some(parent) = path.parent() {
+        let _ = fs::create_dir_all(parent);
+    }
+
+    if let Ok(json) = serde_json::to_string_pretty(state) {
+        let _ = fs::write(&path, json);
+    }
+}
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(tauri_plugin_store::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             list_dir,
+            full_files_list,
             list_disks,
             delete_path,
+            delete_path_to_trash,
             // play,
             // stop,
             fetch_site,

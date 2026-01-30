@@ -3,6 +3,7 @@ import { LIST_ITEM_TYPES } from "../enums/listItems.js";
 
 
 import { invoke } from '@tauri-apps/api/core';
+import { STATUS_STATES } from "../enums/statusLineStates.js";
 
 
 
@@ -16,8 +17,8 @@ export const getDrives = async () => {
     // },...]
     return disks?.map(d => ({ ...d, type: LIST_ITEM_TYPES.DRIVE }));
 }
-export const getFolderItems = async (path, sizeCache = {}) => {
-    const getType = ({ is_dir, is_file, is_symlink, is_drive }) => {
+export const getFolderItems = async (path, sizeCache = {}, isFullList = false) => {
+    const getType = ({ is_dir, is_file, is_symlink, is_drive, path }) => {
         if (is_drive) return LIST_ITEM_TYPES.DRIVE;
         if (is_symlink) return LIST_ITEM_TYPES.LINK;
         if (is_dir) return LIST_ITEM_TYPES.FOLDER;
@@ -32,8 +33,14 @@ export const getFolderItems = async (path, sizeCache = {}) => {
         else return name.includes(".") ? name.split(".").pop() : "?unk";
     }
     if (path) {
-        console.log(path, typeof path)
-        const items = (await invoke("list_dir", { path }));
+        let items;
+        if (isFullList) {
+            items = await invoke("full_files_list", { path });
+        }
+        else {
+            items = (await invoke("list_dir", { path }));
+
+        }
         // console.log(path, items)
         const normalizedItems = items.map((item) => {
             const { is_dir, is_file, is_symlink, is_drive, name, modified, path } = item;
@@ -67,16 +74,20 @@ export const getFolderItems = async (path, sizeCache = {}) => {
 export const deletePath = async (path) => {
     console.log("delete:", path);
     try {
-        await invoke("delete_path", ({ path }));
+        await invoke("delete_path_to_trash", ({ path }));
     } catch (e) {
         console.warn(e);
     }
 }
 
 export const doSizeCache = async ({ path, onUpdate, onFinish }) => {
-    onUpdate(` Calculating size: "${path}" ...`);
+    let message = ` Calculating size: "${path}" ...`;
+    let statusState = STATUS_STATES.busy;
+    onUpdate({ statusState, message });
     const sizeCache = await invoke("calc_folder_sizes", { path });
-    onUpdate(` Calculated: "${path}"`);
+    message = ` Calculated: "${path}"`;
+    statusState = STATUS_STATES.ok;
+    onUpdate({ statusState, message });
     onFinish(sizeCache);
 
     // const sizeCache = {};
@@ -88,7 +99,9 @@ export const doSizeCache = async ({ path, onUpdate, onFinish }) => {
 
 }
 const getFolderSize = async (folderPath, sizeCache, onUpdate) => {
-    onUpdate(`Calculating folder: ${folderPath}`)
+    let message = ` Calculating size: "${folderPath}" ...`;
+    let statusState = STATUS_STATES.busy;
+    onUpdate({ statusState, message });
     // console.log(sizeCache);
     let folderSize = 0;
     const files = await invoke("list_dir", { path: folderPath });

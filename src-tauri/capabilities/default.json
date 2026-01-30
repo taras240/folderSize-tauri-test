@@ -8,6 +8,10 @@
   "permissions": [
     "core:default",
     "opener:default",
+    "store:allow-get",
+    "store:allow-load",
+    "store:allow-set",
+    "store:allow-save",
     "core:window:allow-set-effects",
     "core:window:allow-minimize",
     "core:window:allow-maximize",

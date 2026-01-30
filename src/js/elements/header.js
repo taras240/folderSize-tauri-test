@@ -1,6 +1,7 @@
-import { buttons, curentPathPanel } from "./controls.js";
-import { GO_TO_DIRECTIONS } from "./enums/gotoDirections.js";
-import { fromHtml } from "./functions/html.js";
+import { curentPathPanel } from "./controls.js";
+import { GO_TO_DIRECTIONS } from "../enums/gotoDirections.js";
+import { fromHtml } from "../functions/html.js";
+import { controlButtons } from "./buttons.js";
 
 export const windowHeader = () => {
     return fromHtml(
@@ -22,16 +23,18 @@ export const headerElement = () => {
 const headerControls = () => {
     const controls = document.createElement("div");
     controls.classList.add("header__controls-container");
-    const backButton = buttons.back({ id: "control-back" });
+    const backButton = controlButtons.back({ id: "control-back" });
     controls.append(
         backButton,
-        buttons.forward({ id: "control-forvard" }),
-        buttons.home({ id: "control-home" }),
-        buttons.refresh({ id: "control-refresh" }),
+        controlButtons.forward({ id: "control-forvard" }),
+        controlButtons.home({ id: "control-home" }),
+        controlButtons.refresh({ id: "control-refresh" }),
 
         curentPathPanel({ id: "path" }),
-        buttons.sort({ id: "control-sort-list" }),
-        buttons.folderSize({ id: "control-show-size" })
+        controlButtons.sort({ id: "control-sort-list" }),
+        controlButtons.folderSize({ id: "control-show-size" }),
+        controlButtons.fullFolder({ id: "control-show-all-files" }),
+        controlButtons.videoLibrary({ id: "control-switch-video-view" })
     )
     return controls;
 }
