@@ -5,9 +5,10 @@ import { getConfig, saveSettingProperty } from "./config.js";
 import { VOLUME_PRESETS } from "./enums/volumePresets.js";
 import { isAudio } from "./functions/fileFormats.js";
 import { getFolderItems } from "./functions/listFuncs.js";
-import { getMetaData } from "./functions/metaData.js";
+import { getMetaData } from "./functions/metaData/metaData.js";
 
 import { convertFileSrc } from '@tauri-apps/api/core';
+import { formatSongDuration } from "./functions/timeFormat.js";
 
 export class Player {
     isShuffle = false;
@@ -182,12 +183,7 @@ export class Player {
 
     async updatePlayerData(file, doUpdate = true) {
 
-        const normalizeDuration = (duration) => {
-            duration = ~~duration;
-            const minutes = ~~(duration / 60);
-            const seconds = duration % 60;
-            return `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`
-        }
+
 
         const updateIntervalMS = 1000;
         this.updateProgressInterval && clearInterval(this.updateProgressInterval);
@@ -205,7 +201,7 @@ export class Player {
         const updateProgressData = (interval) => {
             interval ??= doUpdate ? updateIntervalMS : 0;
             const elapsed = this.audio.currentTime;
-            const elapsedString = normalizeDuration(elapsed);
+            const elapsedString = formatSongDuration(elapsed);
             this.playerElements.elapsedTime.innerText = elapsedString;
             const progress = 100 * (doUpdate ? elapsed + 0.5 : elapsed) / duration;
             this.playerElements.seekbar.style.setProperty("--transition-duration", `${interval}ms`);
@@ -223,7 +219,7 @@ export class Player {
         }
 
         updateStaticData();
-        const durString = normalizeDuration(duration);
+        const durString = formatSongDuration(duration);
         this.playerElements.duration.innerText = durString;
 
         updateProgressData();
@@ -243,7 +239,18 @@ export class Player {
         if (targetIndx !== -1) {
             this.setVolume(presetsArray[targetIndx])
         }
-        else this.setVolume(VOLUME_PRESETS.max)
+        else {
+            let vol = 0;
+            const increaseInterval = setInterval(() => {
+                vol = Math.min(vol + 0.05, VOLUME_PRESETS.max);
+                this.setVolume(vol);
+
+                if (vol >= VOLUME_PRESETS.max) {
+                    clearInterval(increaseInterval);
+                }
+            }, 10);
+
+        }
     }
     setVolume(targetVolume) {
         targetVolume ??= this.audio.volume;

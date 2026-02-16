@@ -1,3 +1,4 @@
+import { fromHtml } from "../functions/html.js";
 
 const iconTemplate = (iconName) => `<i class="svg-icon ${iconName}-icon"></i>`;
 
@@ -20,4 +21,9 @@ export const iconsHtml = {
     shuffle: iconTemplate("shuffle"),
     volume: iconTemplate("volume"),
     delete: iconTemplate("delete"),
+
+}
+const inputIconTemplate = ({ type }) => `<span class="input-icon svg-icon ${type}-icon"></span>`
+export const InputIcons = {
+    Radio: () => fromHtml(inputIconTemplate({ type: "radio" }))
 }

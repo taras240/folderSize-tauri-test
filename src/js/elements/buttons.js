@@ -37,7 +37,7 @@ const buttonsHtml = {
         id,
         classList: ["header-control", "control-button", "folder-library-button", ...classList],
         iconHtml: iconsHtml.videoLibrary,
-        title: "Video View"
+        title: "View"
     }),
     folderList: ({ id, classList = [] }) => iconButton({
         id,

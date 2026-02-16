@@ -50,10 +50,10 @@ const hideWebviewTitle = (appWindow) => {
 
 export const ui = new UI();
 window.ui = ui;
-window.addEventListener("contextmenu", (e) => {
-    e.preventDefault();
-    invoke("open_context_menu", {
-        x: e.clientX,
-        y: e.clientY
-    });
-});
+// window.addEventListener("contextmenu", (e) => {
+//     e.preventDefault();
+//     invoke("open_context_menu", {
+//         x: e.clientX,
+//         y: e.clientY
+//     });
+// });

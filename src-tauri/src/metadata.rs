@@ -8,6 +8,8 @@ pub struct Metadata {
     album: Option<String>,
     year: Option<u32>,
     duration: Option<f64>,
+    bitrate: Option<u32>,
+    // sample_rate: Option<u32>,
 }
 
 #[tauri::command]
@@ -26,5 +28,6 @@ pub fn get_metadata(path: String) -> Result<Metadata, String> {
         album: tag.and_then(|t| t.album().map(|s| s.to_string())),
         year: tag.and_then(|t| t.year()),
         duration: Some(properties.duration().as_secs_f64()),
+        bitrate: properties.audio_bitrate(),
     })
 }

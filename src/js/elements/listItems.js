@@ -5,19 +5,20 @@ import { fromHtml } from "../functions/html.js";
 import { deletePath } from "../functions/listFuncs.js";
 import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 import { iconsHtml } from "./icons.js";
+import { LIST_VIEW_TYPES } from "../enums/listViews.js";
 
 
 
 
-export const listElement = (item) => {
+export const listElement = (item, listViewType) => {
 
     switch (item.type) {
         case LIST_ITEM_TYPES.DRIVE:
-            return driveElement(item);
+            return driveElement(item, listViewType);
         case LIST_ITEM_TYPES.FILE:
-            return fileElement(item);
+            return fileElement(item, listViewType);
         case LIST_ITEM_TYPES.FOLDER:
-            return folderElement(item);
+            return folderElement(item, listViewType);
         default:
             return;
     }
@@ -35,7 +36,7 @@ const folderElement = (item) => {
     })
     return li;
 }
-const fileElement = (item) => {
+const fileElement = (item, listViewType = LIST_VIEW_TYPES.files) => {
     const { name, size, modified, readonly, hidden, path, fileType } = item;
     const li = document.createElement("li");
     li.dataset.type = LIST_ITEM_TYPES.FILE;
@@ -43,7 +44,14 @@ const fileElement = (item) => {
     li.dataset.name = name;
     li.dataset.path = path;
     li.dataset.size = size;
-    li.innerHTML = fileHtml(item);
+    switch (listViewType) {
+        case (LIST_VIEW_TYPES.audio):
+            li.innerHTML = audioFileHtml(item);
+            break;
+        default:
+            li.innerHTML = fileHtml(item);
+            break;
+    }
     li.addEventListener("click", async (event) => {
         if (event.target.closest(".delete-button")) {
             event.stopPropagation();
@@ -117,7 +125,7 @@ const videoHtml = (item) => {
     const { name, normalizedName, is_dir, is_file, is_symlink, size, modifiedDate, readonly, hidden, type, fileType, path } = item;
     const normalizedSize = getNormalizedSize(size);
     return `
-        <video class="list__video-container" controls muted loop src="${convertFileSrc(path)}"></video>
+        <video class="list__video-container" controls muted loop src="${convertFileSrc(path)}" loading="lazy"></video>
         <div class="list__video-details" title="${name}">${normalizedSize} :: ${normalizedName}</div>
         <div class="list__video-buttons">
             <button class="list-item__button delete-button">
@@ -128,8 +136,8 @@ const videoHtml = (item) => {
      `
 }
 const fileHtml = (item) => {
-    const { name, normalizedName, is_dir, is_file, is_symlink, size, modifiedDate, readonly, hidden, type, fileType } = item;
-    const normalizedSize = getNormalizedSize(size);
+    const { name, normalizedName, is_dir, is_file, is_symlink, size, normalizedSize, modifiedDate, readonly, hidden, type, fileType } = item;
+
     const sizeClass = getSizeClass(size);
 
     return `
@@ -146,6 +154,21 @@ const fileHtml = (item) => {
                 ${iconsHtml.delete}
             </button>
         </div>
+    `;
+}
+export const itemBadge = ({ text, classList = [] }) => fromHtml(`
+        <div class="list-item__column text-badge ${classList.join(" ")}">
+            ${text}
+        </div>
+    `)
+const audioFileHtml = (item) => {
+    const { name, normalizedName, is_dir, is_file, is_symlink, size, normalizedSize, modifiedDate, readonly, hidden, type, fileType } = item;
+
+
+    return `
+        ${fileTypeHtml(fileType)}
+        <div class="list-item__column list-item__title">${normalizedName} 🔹 ${normalizedSize}</div>
+        <div class="list-item__space"></div>
     `;
 }
 const driveHtml = (drive) => {

@@ -9,6 +9,14 @@
     mask-repeat: no-repeat;
 }
 
+.svg-icon.input-icon {
+    font-size: 1.1em;
+}
+
+.svg-icon.input-icon:hover {
+    background: var(--accent-color);
+}
+
 .back-icon {
     mask-image: url(../assets/icons/arrow_back.svg);
 }
@@ -75,6 +83,13 @@
 }
 
 .folder_list-icon {
-    mask-image: url(../assets/icons/folder_list.svg
-);
+    mask-image: url(../assets/icons/folder_list.svg);
+}
+
+.radio-icon {
+    mask-image: url(../assets/icons/radio.svg);
+}
+
+input:checked+.radio-icon {
+    mask-image: url(../assets/icons/radio_filled.svg);
 }

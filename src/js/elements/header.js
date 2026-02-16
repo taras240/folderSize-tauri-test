@@ -34,7 +34,7 @@ const headerControls = () => {
         controlButtons.sort({ id: "control-sort-list" }),
         controlButtons.folderSize({ id: "control-show-size" }),
         controlButtons.fullFolder({ id: "control-show-all-files" }),
-        controlButtons.videoLibrary({ id: "control-switch-video-view" })
+        controlButtons.videoLibrary({ id: "control-switch-view" })
     )
     return controls;
 }

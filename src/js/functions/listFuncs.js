@@ -26,6 +26,17 @@ export const getFolderItems = async (path, sizeCache = {}, isFullList = false) =
 
         return LIST_ITEM_TYPES.UNKNOWN;
     };
+    const getNormalizedSize = (size) => {
+        if (typeof (size) !== "number") return "";
+        const units = ["B", "KB", "MB", "GB", "TB"];
+        let i = 0;
+
+        while (size >= 1024 && i < units.length - 1) {
+            size /= 1024;
+            i++;
+        }
+        return `${Number(size.toFixed(2))}${units[i]}`;
+    };
     const getFileType = (file) => {
         const { name, is_dir, is_file, is_symlink } = file;
         if (is_dir) return "dir";
@@ -43,22 +54,25 @@ export const getFolderItems = async (path, sizeCache = {}, isFullList = false) =
         }
         // console.log(path, items)
         const normalizedItems = items.map((item) => {
-            const { is_dir, is_file, is_symlink, is_drive, name, modified, path } = item;
+            const { is_dir, is_file, is_symlink, is_drive, name, modified, path, size } = item;
 
             const type = getType(item);
             const modifiedDate = new Date(modified).toLocaleDateString();
             const normalizedName = is_file ? name.replace(/\.([a-z0-9.]+)$/i, "") : name;
+
             const fileType = getFileType(item);
             const cachedSize = sizeCache[path];
             if (is_dir && isFinite(cachedSize)) {
                 item.size = cachedSize;
             }
+            const normalizedSize = getNormalizedSize(size || cachedSize);
             const normalizedItem = {
                 ...item,
                 type,
                 modifiedDate,
                 normalizedName,
                 fileType,
+                normalizedSize
             }
             return normalizedItem
         })
