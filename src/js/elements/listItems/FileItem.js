@@ -3,6 +3,7 @@ import { LIST_ITEM_TYPES } from "../../enums/listItems.js";
 import { LIST_VIEW_TYPES } from "../../enums/listViews.js";
 import { isAudio } from "../../functions/fileFormats.js";
 import { fromHtml } from "../../functions/html.js";
+import { deletePath } from "../../functions/listFuncs.js";
 import { getSizeClass } from "../../functions/metaData/normalizedSize.js";
 import { iconsHtml } from "../icons.js";
 import { fileTypeHtml, sizeHtml } from "./components/badges.js";

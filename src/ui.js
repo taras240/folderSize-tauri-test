@@ -23,6 +23,7 @@ import { getConfig, saveSettingProperty } from "./js/config.js";
 import { SORT_NAMES } from "./js/functions/filesSort.js";
 import { VideoElement } from "./js/elements/listItems/VideoItem.js";
 import { LIST_ITEM_TYPES } from "./js/enums/listItems.js";
+import { event } from "@tauri-apps/api";
 
 export class UI {
     listViewType = LIST_VIEW_TYPES.audio;
@@ -251,18 +252,34 @@ export class UI {
             onFinish: (cache) => this.updateSizeCache(cache)
         })
     }
-    async openFolder(path, isFullFolder) {
+    toggleLoadingScreen({ show = true, message = "Loading", cancelCallback }) {
+        this.app.querySelectorAll(".loading-screen").forEach(s => s.remove());
+        if (show) {
+            console.log({ show })
+            const loadingElement = fromHtml(`
+                <div class="loading-screen">Loading...</div>
+            `)
+            loadingElement.addEventListener("click", (event) => console.log("Cancel loading"));
+            this.app.append(loadingElement);
+        }
+    }
+
+    async openFolder(path, isFullFolder = false) {
         path ??= GO_TO_DIRECTIONS.home;
         this.list.innerHTML = "";
         this.path.value = path;
         appWindow.setTitle(`[ ${path} ]`);
         let items = [];
+        console.log({ isFullFolder })
+        this.toggleLoadingScreen({ show: isFullFolder });
         if (path === GO_TO_DIRECTIONS.home) {
             items = await getDrives();
         }
         else {
             items = await getFolderItems(path, this.sizeCache, isFullFolder);
         }
+        this.toggleLoadingScreen({ show: false });
+
         this.showItems(items);
     }
     openWeb(items) {

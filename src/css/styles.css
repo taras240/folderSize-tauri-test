@@ -170,20 +170,29 @@ input.header-control {
 
 .status-line {
   width: 100%;
-  font-size: 1rem;
-  background-color: black;
-  color: white;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+  color: var(--font-color);
+  background: transparent;
+  border-top: 1px solid var(--hover-button-background);
+  padding: 0.05rem 0.5rem 0.25rem;
+  font-weight: 300;
+  font-size: 0.9rem;
+  font-family: consolas;
+  color: red;
+}
+
+.status-line:is(:empty) {
+  display: none;
 }
 
 .status-line[data-status="busy"] {
-  color: yellow;
+  color: var(--font-color);
 }
 
 .status-line[data-status="ok"] {
-  color: greenyellow;
+  color: var(--font-color);
 }
 
 .status-line[data-status="error"] {
@@ -239,4 +248,16 @@ audio {
 
 .link:hover {
   text-decoration: underline;
+}
+
+.loading-screen {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: var(--hover-button-background);
+  backdrop-filter: blur(2px);
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  font-weight: 500;
 }

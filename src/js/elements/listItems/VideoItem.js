@@ -3,6 +3,7 @@ import { LIST_ITEM_TYPES } from "../../enums/listItems.js";
 import { isVideo } from "../../functions/fileFormats.js";
 import { getNormalizedSize } from "../../functions/metaData/normalizedSize.js";
 import { iconsHtml } from "../icons.js";
+import { deletePath } from "../../functions/listFuncs.js";
 
 const videoHtml = (item) => {
     const { name, normalizedName, is_dir, is_file, is_symlink, size, modifiedDate, readonly, hidden, type, fileType, path } = item;

@@ -1,4 +1,5 @@
 import { LIST_ITEM_TYPES } from "../../enums/listItems.js";
+import { deletePath } from "../../functions/listFuncs.js";
 import { getSizeClass } from "../../functions/metaData/normalizedSize.js";
 import { iconsHtml } from "../icons.js";
 import { fileTypeHtml, sizeHtml } from "./components/badges.js";
