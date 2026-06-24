@@ -9,6 +9,7 @@ import { getMetaData } from "./functions/metaData/metaData.js";
 
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { formatSongDuration } from "./functions/timeFormat.js";
+import { fromHtml } from "./functions/html.js";
 
 export class Player {
     isShuffle = false;
@@ -17,7 +18,7 @@ export class Player {
     }
     getCurrentFolderPath() {
         const curFile = this.getCurrentlyPlayed();
-        const curFolder = curFile?.path?.replace(/[^\\\/]+$/gi, "");
+        const curFolder = curFile?.path?.replace(/[\\\/][^\\\/]+$/gi, "");
         return curFolder;
     }
 
@@ -178,12 +179,19 @@ export class Player {
             this.play(file);
         }
         this.setElementsValues();
-
     }
-
+    async openUrl(urlItem, items) {
+        const curFile = this.getCurrentlyPlayed();
+        if (curFile && curFile.url && curFile.url === urlItem.url) {
+            this.resume();
+        }
+        else {
+            await this.createPlaylist({ filePath: urlItem.url, filesList: items, folderPath: "network" })
+            this.play(urlItem);
+        }
+        this.setElementsValues();
+    }
     async updatePlayerData(file, doUpdate = true) {
-
-
 
         const updateIntervalMS = 1000;
         this.updateProgressInterval && clearInterval(this.updateProgressInterval);
@@ -208,14 +216,24 @@ export class Player {
             this.playerElements.seekbar.style.setProperty("--completion", `${progress}%`);
         }
         const updateStaticData = () => {
-            let songTitle;
+            this.playerElements.title.innerHTML = "";
+            let songTitle = fromHtml("<p></p>");
             if (artist && title) {
-                songTitle = `<span class="bold">${artist}</span> - ${title}`;
+                const artistElement = fromHtml(`<span class="bold link">${artist}</span>`);
+                artistElement.addEventListener("click", () => ui.search(artist));
+                songTitle.append(artistElement, ` - ${title}`);
+                // songTitle = `<span class="bold">${artist}</span> - ${title}`;
             }
             else {
-                songTitle = file.normalizedName;
+                const titleElement = fromHtml(`<span class="link">${file.normalizedName}</span>`);
+
+                titleElement.addEventListener("click", () => {
+                    const searchRequest = file.normalizedName.split("-")[0]?.trim();
+                    ui.search(searchRequest)
+                })
+                songTitle.append(titleElement);
             }
-            this.playerElements.title.innerHTML = songTitle;
+            this.playerElements.title.append(songTitle);
         }
 
         updateStaticData();
@@ -270,10 +288,10 @@ export class Player {
     async play(file) {
 
         file ??= this.getCurrentlyPlayed();
-        const { name, size, modified, readonly, hidden, path, fileType } = file;
+        const { name, size, modified, readonly, hidden, path, url, fileType } = file;
         this.stop();
         this.playlistIndex = this.playlist.findIndex(file => file.path === path);
-        const src = convertFileSrc(path);
+        const src = url || convertFileSrc(path);
         this.audio.src = src;
         this.audio.addEventListener('canplay', () => {
             this.audio.play();

@@ -69,6 +69,9 @@ const RadioButton = ({ label, name, isChecked, onChange }) => {
         removeContextMenus();
         onChange();
     });
+    input.addEventListener("click", () => {
+        setTimeout(() => removeContextMenus(), 50);
+    });
 
     return radioContainer;
 }

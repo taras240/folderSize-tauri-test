@@ -2,6 +2,7 @@ import { curentPathPanel } from "./controls.js";
 import { GO_TO_DIRECTIONS } from "../enums/gotoDirections.js";
 import { fromHtml } from "../functions/html.js";
 import { controlButtons } from "./buttons.js";
+import { TextInputElement } from "./controls/TextInput.js";
 
 export const windowHeader = () => {
     return fromHtml(
@@ -24,6 +25,12 @@ const headerControls = () => {
     const controls = document.createElement("div");
     controls.classList.add("header__controls-container");
     const backButton = controlButtons.back({ id: "control-back" });
+
+    const searchInput = TextInputElement({
+        classList: ["header-control", "search-input"],
+        placeholder: "search",
+        onChange: (event) => ui.search(event.currentTarget.value)
+    });
     controls.append(
         backButton,
         controlButtons.forward({ id: "control-forvard" }),
@@ -34,7 +41,8 @@ const headerControls = () => {
         controlButtons.sort({ id: "control-sort-list" }),
         controlButtons.folderSize({ id: "control-show-size" }),
         controlButtons.fullFolder({ id: "control-show-all-files" }),
-        controlButtons.videoLibrary({ id: "control-switch-view" })
+        controlButtons.videoLibrary({ id: "control-switch-view" }),
+        searchInput,
     )
     return controls;
 }

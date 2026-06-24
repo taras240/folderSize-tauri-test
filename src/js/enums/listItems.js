@@ -4,4 +4,5 @@ export const LIST_ITEM_TYPES = Object.freeze({
     FILE: "file",
     LINK: "link",
     DRIVE: "drive",
+    URL: "url"
 });

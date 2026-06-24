@@ -4,6 +4,7 @@ import { LIST_ITEM_TYPES } from "../enums/listItems.js";
 
 import { invoke } from '@tauri-apps/api/core';
 import { STATUS_STATES } from "../enums/statusLineStates.js";
+import { getNormalizedSize } from "./metaData/normalizedSize.js";
 
 
 
@@ -26,17 +27,7 @@ export const getFolderItems = async (path, sizeCache = {}, isFullList = false) =
 
         return LIST_ITEM_TYPES.UNKNOWN;
     };
-    const getNormalizedSize = (size) => {
-        if (typeof (size) !== "number") return "";
-        const units = ["B", "KB", "MB", "GB", "TB"];
-        let i = 0;
 
-        while (size >= 1024 && i < units.length - 1) {
-            size /= 1024;
-            i++;
-        }
-        return `${Number(size.toFixed(2))}${units[i]}`;
-    };
     const getFileType = (file) => {
         const { name, is_dir, is_file, is_symlink } = file;
         if (is_dir) return "dir";

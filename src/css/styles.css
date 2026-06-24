@@ -12,7 +12,7 @@
 
 
 :root {
-  --main-color: #191919;
+  --main-color: whitesmoke;
   --font-color: black;
   --accent-color: rgb(15, 108, 189);
   --active-color: rgb(0, 136, 255);
@@ -160,9 +160,13 @@ input.header-control {
   pointer-events: none;
   flex: 1;
   padding: 0 0.5rem;
+  display: none;
 }
 
-
+.search-input.header-control {
+  font-size: 1rem;
+  flex: 1;
+}
 
 .status-line {
   width: 100%;
@@ -227,4 +231,12 @@ audio {
 
 .bold {
   font-weight: bold;
+}
+
+.link {
+  cursor: pointer;
+}
+
+.link:hover {
+  text-decoration: underline;
 }

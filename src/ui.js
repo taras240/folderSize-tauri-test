@@ -1,4 +1,4 @@
-import { audioPlayerElement } from "./js/elements/audioPlayer.js";
+import { AudioPlayerElement } from "./js/elements/audioElements/AudioPlayer.js";
 import { statusLine } from "./js/elements/controls.js";
 import { GO_TO_DIRECTIONS } from "./js/enums/gotoDirections.js";
 import { isAudio, isVideo } from "./js/functions/fileFormats.js";
@@ -7,7 +7,7 @@ import { doSizeCache, getDrives, getFolderItems } from "./js/functions/listFuncs
 import { getMetaData } from "./js/functions/metaData/metaData.js";
 import { headerElement } from "./js/elements/header.js";
 import { mainList } from "./js/elements/list.js";
-import { itemBadge, listElement, videoElement } from "./js/elements/listItems.js"
+import { itemBadge, listElement } from "./js/elements/listItems.js"
 import { sideBarElement } from "./js/elements/sideBar.js";
 import { appWindow } from "./main.js";
 
@@ -19,8 +19,10 @@ import { STATUS_STATES } from "./js/enums/statusLineStates.js";
 import { LIST_VIEW_TYPES } from "./js/enums/listViews.js";
 import { formatSongDuration } from "./js/functions/timeFormat.js";
 import { ContextMenu, removeContextMenus, setPosition } from "./js/elements/contextMenu/contextMenu.js";
-import { event } from "@tauri-apps/api";
 import { getConfig, saveSettingProperty } from "./js/config.js";
+import { SORT_NAMES } from "./js/functions/filesSort.js";
+import { VideoElement } from "./js/elements/listItems/VideoItem.js";
+import { LIST_ITEM_TYPES } from "./js/enums/listItems.js";
 
 export class UI {
     listViewType = LIST_VIEW_TYPES.audio;
@@ -44,6 +46,7 @@ export class UI {
     async initConfig() {
         const config = await getConfig();
         this.listViewType = config?.listViewType || LIST_VIEW_TYPES.files;
+        this.sortName = config?.sortName || SORT_NAMES.fileName;
     }
     generateUI() {
         this.app.innerHTML = "";
@@ -53,7 +56,7 @@ export class UI {
             // windowHeader(),
             headerElement(),
             mainContent,
-            audioPlayerElement(),
+            AudioPlayerElement(),
             statusLine(),
         );
     }
@@ -78,7 +81,7 @@ export class UI {
         $("#control-refresh").addEventListener("click", () => this.openFolder(this.curPath));
         $("#control-show-size").addEventListener("click", () => this.showSize());
         $("#control-show-all-files").addEventListener("click", () => this.openFolder(this.curPath, true));
-
+        $("#control-sort-list").addEventListener("click", event => this.toggleSortContextMenu(event));
         $("#control-switch-view").addEventListener("click", event => this.toggleSwitchViewContextMenu(event));
 
         $("#control-sort-list").addEventListener("click", async () => {
@@ -90,7 +93,8 @@ export class UI {
 
 
 
-    } registerSidebarHandlers($) {
+    }
+    registerSidebarHandlers($) {
         $("#sidebar-user-music").addEventListener("click", async () => {
             const musicPath = await invoke("parse_env_path", { path: "%USERPROFILE%\\Music" });
             this.goto(musicPath);
@@ -127,7 +131,21 @@ export class UI {
         navigator.mediaSession.setActionHandler('play', () => this.player.resume());
         navigator.mediaSession.setActionHandler('stop', () => this.player.stop());
     }
-
+    toggleSortContextMenu(event) {
+        event.stopPropagation();
+        const contextMenu = ContextMenu(Object.keys(SORT_NAMES).map(sortName => ({
+            type: "radio",
+            name: "sort-list",
+            isChecked: this.sortName === sortName,
+            label: sortName,
+            onChange: () => this.sortList(sortName),
+        })
+        ));
+        this.app.append(contextMenu);
+        const rect = event.currentTarget.getBoundingClientRect();
+        const position = { X: rect.left + rect.width / 2, Y: rect.top + rect.height };
+        setPosition({ element: contextMenu, position, event });
+    }
     toggleSwitchViewContextMenu(event) {
         event.stopPropagation();
         const contextMenu = ContextMenu([
@@ -165,9 +183,19 @@ export class UI {
         saveSettingProperty({ property: "listViewType", value: view })
         // console.log("isVideo: ", this.isVideoView)
     }
-    async goto(path) {
+    sortList(sortName) {
+        this.sortName = sortName;
+        this.openFolder(this.curPath);
+        saveSettingProperty({ property: "sortName", value: sortName })
+    }
+    async goto(path, items = []) {
         path = path?.replace(/[\\\/]+[\\\/]$/, "");
-        if (path === this.curPath) {
+        if (path == GO_TO_DIRECTIONS.web_search) {
+            this.openWeb(items);
+            // this.curPath = GO_TO_DIRECTIONS.web_search;
+            // this.pathHistory.push(this.curPath);
+        }
+        else if (path === this.curPath) {
             await this.openFolder(path);
         }
         else if (path === GO_TO_DIRECTIONS.back) {
@@ -227,6 +255,7 @@ export class UI {
         path ??= GO_TO_DIRECTIONS.home;
         this.list.innerHTML = "";
         this.path.value = path;
+        appWindow.setTitle(`[ ${path} ]`);
         let items = [];
         if (path === GO_TO_DIRECTIONS.home) {
             items = await getDrives();
@@ -234,6 +263,13 @@ export class UI {
         else {
             items = await getFolderItems(path, this.sizeCache, isFullFolder);
         }
+        this.showItems(items);
+    }
+    openWeb(items) {
+        path ??= GO_TO_DIRECTIONS.web_search;
+        this.list.innerHTML = "";
+        this.path.value = "WEB SEARCH";
+        appWindow.setTitle('WEB SEARCH');
         this.showItems(items);
     }
     showItems(items) {
@@ -252,7 +288,27 @@ export class UI {
                 break;
         }
     }
+    async search(value) {
+        // const url = `https://www.youtube.com/results?search_query=ABBA`;
+        let links = [];
+        for (let i = 1; i < 6; i++) {
+            const url = `https://spaces.im/ajax1772834143892/music-online/search/index/?Link_id=1527673&T=28&P=${i}&sq=${value}`;
+            const resp = await invoke("fetch_site", { url });
+            const contentHtml = JSON.parse(resp).content;
+            const content = fromHtml(`<div>${contentHtml}</div>`);
+            links = links.concat([...content.querySelectorAll(".list>.block")].map(el => {
+                const artist = el.querySelector("div")?.innerText.replace(/\:.*$/, "").trim();
+                const title = el.querySelector(".block div a")?.innerText;
+                const name = `${artist} – ${title}`;
+                const url = el.querySelector("div>a:nth-of-type(2)")?.href;
+                if (!url) return;
+                return ({ name, url, path: url, artist, title, fileType: "mp3", type: LIST_ITEM_TYPES.URL });
+            }).filter(el => el))
+        }
+        this.goto(GO_TO_DIRECTIONS.web_search, links);
+        // this.showItems(links)
 
+    }
     _showFiles(items) {
         this.list.classList.toggle("video-view", this.isVideoView);
         this.items = items;
@@ -287,7 +343,7 @@ export class UI {
 
             for (let i = currentIndex; i < endIndex; i++) {
                 const item = items[i];
-                const itemElement = item.is_dir ? listElement(item) : videoElement(item);
+                const itemElement = item.is_dir ? listElement(item) : VideoElement(item);
                 if (!itemElement) continue;
                 videoListContainer.append(itemElement);
                 if (item.is_dir || item.is_drive) itemElement.addEventListener("click", () => this.goto(item.path));
@@ -339,7 +395,7 @@ export class UI {
 
     async _showAudio(items) {
         this.list.classList.toggle("video-view", this.isVideoView);
-        items = items.filter(item => isAudio(item) || item.is_dir || item.is_drive);
+        items = items.filter(item => isAudio(item) || item.is_dir || item.is_drive || item.url);
         this.items = items;
         for (const item of items) {
             const itemElement = listElement(item, this.listViewType);
@@ -350,7 +406,7 @@ export class UI {
         }
     }
     async updateWithMeta(file, element) {
-        if (!file || !element) return;
+        if (!file || !element || file.type === LIST_ITEM_TYPES.URL) return;
         const { path, name, normalizedName, normalizedSize, modifiedDate } = file;
         const meta = await getMetaData(file);
         const { artist, title, duration, album, year, bitrate } = meta;
@@ -379,7 +435,7 @@ export class UI {
         if (this.isVideoView) {
             return shuffle(items);
         }
-        return items.sort((a, b) => sortBy.size(a, b)).sort((a, b) => sortBy.isDir(a, b));
+        return items.sort((a, b) => sortBy[this.sortName || SORT_NAMES.size](a, b)).sort((a, b) => sortBy.isDir(a, b));
     }
     updateSizeCache(cache) {
         this.sizeCache = Object.assign(this.sizeCache, cache);
@@ -410,7 +466,13 @@ export class UI {
         }
     }
     async startPlayer(item) {
-        this.player.openFile(item, this.items);
+        if (item.type === LIST_ITEM_TYPES.URL) {
+            this.player.openUrl(item, this.items);
+        }
+        else {
+
+            this.player.openFile(item, this.items);
+        }
 
     }
     addActiveFile(file, activity) {

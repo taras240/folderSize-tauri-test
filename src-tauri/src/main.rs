@@ -19,6 +19,7 @@ struct DirEntry {
     is_symlink: bool,
     size: Option<u64>,
     modified: Option<u128>, // timestamp
+    created: Option<u128>,
     readonly: bool,
     hidden: bool,
     path: String,
@@ -108,6 +109,11 @@ async fn list_dir(path: String) -> Result<Vec<DirEntry>, String> {
                 .ok()
                 .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
                 .map(|d| d.as_millis()),
+            created: meta
+                .created()
+                .ok()
+                .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+                .map(|d| d.as_millis()),
             readonly: meta.permissions().readonly(),
             hidden: meta.is_symlink(),
             is_symlink: meta.is_symlink(),
@@ -151,6 +157,11 @@ fn full_files_list(path: String) -> Result<Vec<DirEntry>, String> {
                 size: Some(meta.len()),
                 modified: meta
                     .modified()
+                    .ok()
+                    .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+                    .map(|d| d.as_millis()),
+                created: meta
+                    .created()
                     .ok()
                     .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
                     .map(|d| d.as_millis()),
