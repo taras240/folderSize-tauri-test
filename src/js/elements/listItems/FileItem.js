@@ -42,9 +42,7 @@ export const FileElement = (item, listViewType = LIST_VIEW_TYPES.files) => {
     li.addEventListener("click", async (event) => {
         if (event.target.closest(".delete-button")) {
             event.stopPropagation();
-            await deletePath(path);
-            li.remove();
-            console.log("delete", path)
+            await deletePath({ path, onDeleted: () => li.remove() });
         }
         else {
             if (isAudio(item)) {

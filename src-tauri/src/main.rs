@@ -176,21 +176,73 @@ fn full_files_list(path: String) -> Result<Vec<DirEntry>, String> {
     Ok(result)
 }
 
-#[tauri::command]
-fn delete_path(path: String) -> Result<(), String> {
-    let path = Path::new(&path);
+// #[tauri::command]
+// fn delete_path(path: String) -> Result<(), String> {
+//     let path = Path::new(&path);
 
-    if path.is_file() {
-        fs::remove_file(path).map_err(|e| e.to_string())?;
-    } else if path.is_dir() {
-        fs::remove_dir_all(path).map_err(|e| e.to_string())?;
-    } else {
+//     if path.is_file() {
+//         fs::remove_file(path).map_err(|e| e.to_string())?;
+//     } else if path.is_dir() {
+//         fs::remove_dir_all(path).map_err(|e| e.to_string())?;
+//     } else {
+//         return Err("Шлях не існує".into());
+//     }
+
+//     Ok(())
+// }
+
+use windows::{
+    core::HSTRING,
+    Win32::{
+        System::Com::{
+            CoCreateInstance, CoInitializeEx, CoUninitialize, CLSCTX_INPROC_SERVER,
+            COINIT_APARTMENTTHREADED,
+        },
+        UI::Shell::{
+            FileOperation, IFileOperation, IShellItem, SHCreateItemFromParsingName,
+            FOFX_SHOWELEVATIONPROMPT, FOF_ALLOWUNDO, FOF_WANTNUKEWARNING,
+        },
+    },
+};
+
+#[tauri::command]
+fn delete_path(path: String, permanent: bool) -> Result<(), String> {
+    if !Path::new(&path).exists() {
         return Err("Шлях не існує".into());
+    }
+
+    unsafe {
+        CoInitializeEx(None, COINIT_APARTMENTTHREADED)
+            .ok()
+            .map_err(|e| e.to_string())?;
+
+        let result = (|| -> windows::core::Result<()> {
+            let file_op: IFileOperation =
+                CoCreateInstance(&FileOperation, None, CLSCTX_INPROC_SERVER)?;
+
+            let mut flags = FOF_WANTNUKEWARNING | FOFX_SHOWELEVATIONPROMPT.into();
+
+            if !permanent {
+                flags |= FOF_ALLOWUNDO;
+            }
+
+            file_op.SetOperationFlags(flags)?;
+
+            let item: IShellItem = SHCreateItemFromParsingName(&HSTRING::from(path), None)?;
+
+            file_op.DeleteItem(&item, None)?;
+            file_op.PerformOperations()?;
+
+            Ok(())
+        })();
+
+        CoUninitialize();
+
+        result.map_err(|e| e.to_string())?;
     }
 
     Ok(())
 }
-
 #[tauri::command]
 fn delete_path_to_trash(path: String) -> Result<(), String> {
     let path = Path::new(&path);

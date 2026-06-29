@@ -76,11 +76,19 @@ export const getFolderItems = async (path, sizeCache = {}, isFullList = false) =
     }
 
 }
-export const deletePath = async (path) => {
-    console.log("delete:", path);
+export const deletePath = async ({ path, permanent = true, onDeleted, onError }) => {
     try {
-        await invoke("delete_path_to_trash", ({ path }));
+        const removeMessage = await invoke("delete_path", ({ path, permanent }));
+        if (!removeMessage) {
+            onDeleted?.();
+            console.log(`Deleted ${permanent ? "permanently" : ""} file: ${path}`)
+        }
+        else {
+            console.log(`Deleting error-code: ${removeMessage}`);
+            onError?.();
+        }
     } catch (e) {
+        onError?.();
         console.warn(e);
     }
 }

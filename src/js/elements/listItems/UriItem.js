@@ -2,7 +2,6 @@ import { ui } from "../../../main.js";
 import { LIST_ITEM_TYPES } from "../../enums/listItems.js";
 import { LIST_VIEW_TYPES } from "../../enums/listViews.js";
 import { isAudio } from "../../functions/fileFormats.js";
-import { deletePath } from "../../functions/listFuncs.js";
 import { fileHtml } from "../listItems.js";
 import { fileTypeHtml } from "./components/badges.js";
 

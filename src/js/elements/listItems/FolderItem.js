@@ -32,8 +32,7 @@ export const FolderElement = (item) => {
     li.innerHTML = fileHtml(item);
     li.querySelector(".delete-button")?.addEventListener("click", async (e) => {
         e.stopPropagation();
-        await deletePath(path);
-        li.remove();
+        await deletePath({ path, onDeleted: () => li.remove() });
     })
     return li;
 }
