@@ -1,15 +1,25 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use serde::{Deserialize, Serialize};
-use std::{env, fs, path::Path, path::PathBuf, time::UNIX_EPOCH};
-use tauri::{Manager, PhysicalPosition, PhysicalSize, WindowEvent};
-use tauri_plugin_store::StoreBuilder;
-mod disks;
-use disks::*;
-mod net;
-use net::*;
-mod metadata;
-use metadata::*;
+mod modules;
+use modules::disks::*;
+use modules::metadata::*;
+use modules::net::*;
+use std::collections::HashMap;
+use std::{env, fs, path::Path, time::UNIX_EPOCH};
 use trash::delete;
+
+use windows::{
+    core::HSTRING,
+    Win32::{
+        System::Com::{
+            CoCreateInstance, CoInitializeEx, CoUninitialize, CLSCTX_INPROC_SERVER,
+            COINIT_APARTMENTTHREADED,
+        },
+        UI::Shell::{
+            FileOperation, IFileOperation, IShellItem, SHCreateItemFromParsingName,
+            FOFX_SHOWELEVATIONPROMPT, FOF_ALLOWUNDO, FOF_WANTNUKEWARNING,
+        },
+    },
+};
 
 #[derive(serde::Serialize)]
 struct DirEntry {
@@ -37,8 +47,6 @@ fn parse_env_path(path: &str) -> String {
 
     result
 }
-
-use std::collections::HashMap;
 
 #[tauri::command]
 async fn calc_folder_sizes(path: String) -> Result<HashMap<String, u64>, String> {
@@ -176,35 +184,6 @@ fn full_files_list(path: String) -> Result<Vec<DirEntry>, String> {
     Ok(result)
 }
 
-// #[tauri::command]
-// fn delete_path(path: String) -> Result<(), String> {
-//     let path = Path::new(&path);
-
-//     if path.is_file() {
-//         fs::remove_file(path).map_err(|e| e.to_string())?;
-//     } else if path.is_dir() {
-//         fs::remove_dir_all(path).map_err(|e| e.to_string())?;
-//     } else {
-//         return Err("Шлях не існує".into());
-//     }
-
-//     Ok(())
-// }
-
-use windows::{
-    core::HSTRING,
-    Win32::{
-        System::Com::{
-            CoCreateInstance, CoInitializeEx, CoUninitialize, CLSCTX_INPROC_SERVER,
-            COINIT_APARTMENTTHREADED,
-        },
-        UI::Shell::{
-            FileOperation, IFileOperation, IShellItem, SHCreateItemFromParsingName,
-            FOFX_SHOWELEVATIONPROMPT, FOF_ALLOWUNDO, FOF_WANTNUKEWARNING,
-        },
-    },
-};
-
 #[tauri::command]
 fn delete_path(path: String, permanent: bool) -> Result<(), String> {
     if !Path::new(&path).exists() {
@@ -255,68 +234,6 @@ fn delete_path_to_trash(path: String) -> Result<(), String> {
     Ok(())
 }
 
-mod player;
-
-#[tauri::command]
-fn play(path: String) -> Result<(), String> {
-    player::play_file(path)
-}
-
-#[tauri::command]
-fn stop() {
-    player::stop();
-}
-#[derive(Debug, Serialize, Deserialize, Clone)]
-struct WindowState {
-    width: u32,
-    height: u32,
-    x: i32,
-    y: i32,
-    maximized: bool,
-}
-
-impl Default for WindowState {
-    fn default() -> Self {
-        Self {
-            width: 800,
-            height: 600,
-            x: 100,
-            y: 100,
-            maximized: false,
-        }
-    }
-}
-
-fn get_state_path(app: &tauri::AppHandle) -> PathBuf {
-    app.path()
-        .app_data_dir()
-        .expect("Failed to get app data dir")
-        .join("window-state.json")
-}
-
-fn load_window_state(app: &tauri::AppHandle) -> WindowState {
-    let path = get_state_path(app);
-
-    if let Ok(contents) = fs::read_to_string(&path) {
-        if let Ok(state) = serde_json::from_str(&contents) {
-            return state;
-        }
-    }
-
-    WindowState::default()
-}
-
-fn save_window_state(app: &tauri::AppHandle, state: &WindowState) {
-    let path = get_state_path(app);
-
-    if let Some(parent) = path.parent() {
-        let _ = fs::create_dir_all(parent);
-    }
-
-    if let Ok(json) = serde_json::to_string_pretty(state) {
-        let _ = fs::write(&path, json);
-    }
-}
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_window_state::Builder::default().build())
@@ -327,8 +244,6 @@ fn main() {
             list_disks,
             delete_path,
             delete_path_to_trash,
-            // play,
-            // stop,
             fetch_site,
             get_metadata,
             parse_env_path,
