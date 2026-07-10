@@ -13,7 +13,8 @@
 
 
 :root {
-  --main-color: whitesmoke;
+  --main-color: #f5f5f5;
+  --secondary-color: #f0f0f0;
   --font-color: black;
   --accent-color: rgb(15, 108, 189);
   --active-color: rgb(0, 136, 255);
@@ -38,6 +39,7 @@
   :root {
     --font-color: whitesmoke;
     --main-color: #191919;
+    --secondary-color: #272727;
     --accent-color: rgb(15, 108, 189);
     --active-color: rgb(0, 136, 255);
     --selection-color: rgb(15, 108, 189, 0.2);
