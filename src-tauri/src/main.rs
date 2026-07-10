@@ -245,6 +245,7 @@ fn main() {
             delete_path,
             delete_path_to_trash,
             fetch_site,
+            download_file,
             get_metadata,
             set_metadata,
             parse_env_path,
