@@ -27,22 +27,22 @@ export function TagEditorElement({ file, tags, element }) {
                     <div class="metadata-fields">
                         <label>
                             <span>Title</span>
-                            <input type="text" id="metaTitle" value="${title}">
+                            <input type="text" id="metaTitle" value="${title ?? ""}">
                         </label>
 
                         <label>
                             <span>Artist</span>
-                            <input type="text" id="metaArtist" value="${artist}">
+                            <input type="text" id="metaArtist" value="${artist ?? ""}">
                         </label>
 
                         <label>
                             <span>Album</span>
-                            <input type="text" id="metaAlbum" value="${album}">
+                            <input type="text" id="metaAlbum" value="${album ?? ""}">
                         </label>
 
                         <label>
                             <span>Genre</span>
-                            <input type="text" id="metaGenre" value="${genre}">
+                            <input type="text" id="metaGenre" value="${genre ?? ""}">
                         </label>
                         
                         <label>
@@ -51,7 +51,7 @@ export function TagEditorElement({ file, tags, element }) {
                                 id="metaYear"
                                 min="0"
                                 max="9999"
-                                value="${year}">
+                                value="${year ?? ""}">
                         </label>
                         
                         <label>
@@ -59,12 +59,12 @@ export function TagEditorElement({ file, tags, element }) {
                             <input type="number"
                                 id="metaTrack"
                                 min="1"
-                                value="${track}">
+                                value="${track ?? ""}">
                         </label>
 
                         <label>
                             <span>Comment</span>
-                            <textarea id="metaComment" rows="4" value="${comment}"></textarea>
+                            <textarea id="metaComment" rows="4">${comment ?? ""}</textarea>
                         </label>
 
                     </div>
@@ -89,9 +89,9 @@ export function TagEditorElement({ file, tags, element }) {
             artist: modalWindow.querySelector("#metaArtist")?.value ?? "",
             album: modalWindow.querySelector("#metaAlbum")?.value ?? "",
             genre: modalWindow.querySelector("#metaGenre")?.value ?? "",
-            // year: modalWindow.querySelector("#metaYear")?.value ?? "",
-            // track: modalWindow.querySelector("#metaTrack")?.value ?? "",
-            // comment: modalWindow.querySelector("#metaComment")?.value ?? ""
+            year: modalWindow.querySelector("#metaYear")?.value ?? "",
+            track: modalWindow.querySelector("#metaTrack")?.value ?? "",
+            comment: modalWindow.querySelector("#metaComment")?.value ?? ""
         }
         const res = await setMetaData({ path: file.path, tags: newTags });
         console.log(newTags, res);
