@@ -2,6 +2,7 @@ import { ui } from "../../../main.js";
 import { LIST_ITEM_TYPES } from "../../enums/listItems.js";
 import { LIST_VIEW_TYPES } from "../../enums/listViews.js";
 import { isAudio } from "../../functions/fileFormats.js";
+import { fromHtml } from "../../functions/html.js";
 import { fileHtml } from "../listItems.js";
 import { fileTypeHtml } from "./components/badges.js";
 
@@ -22,11 +23,11 @@ export const AudioUriElement = (item, listViewType = LIST_VIEW_TYPES.files) => {
     li.dataset.path = url;
     // li.dataset.size = size;
     li.innerHTML = audioUrlHtml(item);
+    const dwnButton = fromHtml(`<a href="${url}" download="${name}">download</a>`);
+    li.append(dwnButton);
+    // dwnButton = 
     li.addEventListener("click", async (event) => {
-
         ui.startPlayer(item);
-
-
     });
     li.addEventListener("dblclick", async (event) => {
         console.log(isAudio(item), item);

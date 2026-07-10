@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { ui } from "../../../main.js";
 import { LIST_ITEM_TYPES } from "../../enums/listItems.js";
 import { LIST_VIEW_TYPES } from "../../enums/listViews.js";
@@ -5,6 +6,7 @@ import { isAudio } from "../../functions/fileFormats.js";
 import { deletePath } from "../../functions/listFuncs.js";
 import { fileHtml } from "../listItems.js";
 import { fileTypeHtml } from "./components/badges.js";
+import { getMetaData } from "../../functions/metaData/metaData.js";
 
 const audioFileHtml = (item) => {
     const { name, normalizedName, is_dir, is_file, is_symlink, size, normalizedSize, modifiedDate, readonly, hidden, type, fileType } = item;
@@ -31,12 +33,15 @@ export const AudioElement = (item, listViewType = LIST_VIEW_TYPES.files) => {
         }
         else {
             ui.startPlayer(item);
-
         }
     });
     li.addEventListener("dblclick", async (event) => {
         console.log(isAudio(item), item);
         ui.startPlayer(item);
+    });
+    li.addEventListener("contextmenu", async (event) => {
+        event.preventDefault();
+        ui.editMetaData({ element: li, file: item });
     });
     return li;
 }

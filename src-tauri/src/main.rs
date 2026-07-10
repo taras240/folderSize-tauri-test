@@ -246,6 +246,7 @@ fn main() {
             delete_path_to_trash,
             fetch_site,
             get_metadata,
+            set_metadata,
             parse_env_path,
             calc_folder_sizes
         ])

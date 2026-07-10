@@ -10,3 +10,14 @@ export const getMetaData = async (file) => {
         return {};
     }
 }
+export const setMetaData = async ({ path, tags }) => {
+    if (!path || !tags) return;
+    try {
+        console.log(path, tags);
+        const res = await invoke("set_metadata", { path, metadata: tags });
+        return res;
+    } catch (e) {
+        console.log(e);
+        return e;
+    }
+}

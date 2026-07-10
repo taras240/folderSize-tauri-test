@@ -3,6 +3,7 @@
 @import url(./list.css);
 @import url(./icons.css);
 @import url(./audio-player.css);
+@import url(./modal.css);
 
 * {
   font-size: 1rem;
@@ -260,4 +261,10 @@ audio {
   place-items: center;
   font-size: 1.5rem;
   font-weight: 500;
+}
+
+.close-btn {
+  display: grid;
+  place-items: center;
+  background: transparent;
 }

@@ -1,4 +1,4 @@
-use sysinfo::{Disks, System};
+use sysinfo::Disks;
 
 #[derive(serde::Serialize)]
 pub struct DiskInfo {

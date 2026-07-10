@@ -24,6 +24,7 @@ import { SORT_NAMES } from "./js/functions/filesSort.js";
 import { VideoElement } from "./js/elements/listItems/VideoItem.js";
 import { LIST_ITEM_TYPES } from "./js/enums/listItems.js";
 import { event } from "@tauri-apps/api";
+import { TagEditorElement } from "./js/elements/audioElements/tagsModalWindow.js";
 
 export class UI {
     listViewType = LIST_VIEW_TYPES.audio;
@@ -43,6 +44,19 @@ export class UI {
         await this.initConfig();
         this.openFolder();
         this.player = new Player();
+    }
+    async editMetaData({ file, element }) {
+        ui.app.querySelectorAll(".modal").forEach(m => m.remove());
+        const tags = await getMetaData(file);
+        const metadataModal = TagEditorElement({ file, tags, element });
+        ui.app.append(metadataModal);
+        // await invoke("set_metadata", {
+        //     path: "D:\\1.mp3",
+        //     metadata: {
+        //         artist: "Lama",
+        //         title: "Білі Вогні",
+        //     }
+        // });
     }
     async initConfig() {
         const config = await getConfig();
@@ -431,9 +445,10 @@ export class UI {
         const titleElement = element?.querySelector(".list-item__title");
 
         if (titleElement) {
-            const songName = artist && title ? `${artist} - ${title}` : normalizedName;
+            const songName = artist && title ? `${artist} - ${title}` : `❓ ${normalizedName}`;
             titleElement.innerText = `${songName}`;
             const classList = ["audio-badge"];
+            element.querySelectorAll(".audio-badge").forEach(b => b.remove());
             meta.duration && element.append(
                 itemBadge({ text: normalizedDuration, classList }),
                 itemBadge({ text: bitrate + "kbps", classList }),
