@@ -14,6 +14,7 @@ import { fromHtml } from "./functions/html.js";
 export class Player {
     isShuffle = false;
     getCurrentlyPlayed() {
+        console.log(this.playlistIndex, this.playlist, this.playlist?.[this.playlistIndex])
         return this.playlist?.[this.playlistIndex];
     }
     getCurrentFolderPath() {
@@ -186,7 +187,7 @@ export class Player {
             this.resume();
         }
         else {
-            await this.createPlaylist({ filePath: urlItem.url, filesList: items, folderPath: "network" })
+            await this.createPlaylist({ filePath: urlItem.url, filesList: [urlItem], folderPath: "network" })
             this.play(urlItem);
         }
         this.setElementsValues();

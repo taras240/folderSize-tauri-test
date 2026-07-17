@@ -1,5 +1,6 @@
 import { fromHtml } from "../../functions/html.js";
 import { setMetaData } from "../../functions/metaData/metaData.js";
+import { ModalWindowElement } from "../windows/modalWindow.js";
 
 export function TagEditorElement({ file, tags, element }) {
     let { title, artist, album, genre, year, track, comment } = tags;
@@ -7,80 +8,71 @@ export function TagEditorElement({ file, tags, element }) {
     artist ??= parsedArtist;
     title ??= parsedTitle;
     console.log({ parsedArtist, parsedTitle });
-    const modalWindow = fromHtml(`
-        <div class="modal metadata-modal" id="metadataModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Edit Metadata</h2>
-                    <button class="close-btn">&times;</button>
-                </div>
 
-                <div class="modal-body">
-                    <!--<div class="cover-section">
-                        <img id="coverPreview" src="assets/default-cover.png" alt="Cover">
-                        <div class="cover-actions">
-                            <button id="changeCover">Change Cover</button>
-                            <button id="removeCover">Remove</button>
-                        </div>
-                    </div>-->
+    const modalWindow = ModalWindowElement({
+        title: "Edit Metadata",
+        classList: ["metadata-modal"],
+        id: "metadataModal",
 
-                    <div class="metadata-fields">
-                        <label>
-                            <span>Title</span>
-                            <input type="text" id="metaTitle" value="${title ?? ""}">
-                        </label>
+    })
+    const content = fromHtml(`
+        <div class="metadata-fields">
+            <label>
+                <span>Title</span>
+                <input type="text" id="metaTitle" value="${title ?? ""}">
+            </label>
 
-                        <label>
-                            <span>Artist</span>
-                            <input type="text" id="metaArtist" value="${artist ?? ""}">
-                        </label>
+            <label>
+                <span>Artist</span>
+                <input type="text" id="metaArtist" value="${artist ?? ""}">
+            </label>
 
-                        <label>
-                            <span>Album</span>
-                            <input type="text" id="metaAlbum" value="${album ?? ""}">
-                        </label>
+            <label>
+                <span>Album</span>
+                <input type="text" id="metaAlbum" value="${album ?? ""}">
+            </label>
 
-                        <label>
-                            <span>Genre</span>
-                            <input type="text" id="metaGenre" value="${genre ?? ""}">
-                        </label>
-                        
-                        <label>
-                            <span>Year</span>
-                            <input type="number"
-                                id="metaYear"
-                                min="0"
-                                max="9999"
-                                value="${year ?? ""}">
-                        </label>
-                        
-                        <label>
-                            <span>Track</span>
-                            <input type="number"
-                                id="metaTrack"
-                                min="1"
-                                value="${track ?? ""}">
-                        </label>
+            <label>
+                <span>Genre</span>
+                <input type="text" id="metaGenre" value="${genre ?? ""}">
+            </label>
+            
+            <label>
+                <span>Year</span>
+                <input type="number"
+                    id="metaYear"
+                    min="0"
+                    max="9999"
+                    value="${year ?? ""}">
+            </label>
+            
+            <label>
+                <span>Track</span>
+                <input type="number"
+                    id="metaTrack"
+                    min="1"
+                    value="${track ?? ""}">
+            </label>
 
-                        <label>
-                            <span>Comment</span>
-                            <textarea id="metaComment" rows="4">${comment ?? ""}</textarea>
-                        </label>
-
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="modal-btn" id="cancelMetadata">
-                        Cancel
-                    </button>
-
-                    <button class="modal-btn" id="saveMetadata">
-                        Save
-                    </button>
-                </div>
-            </div>
+            <label>
+                <span>Comment</span>
+                <textarea id="metaComment" rows="4">${comment ?? ""}</textarea>
+            </label>
         </div>
     `);
+    modalWindow.querySelector(".modal-body")?.append(content);
+
+    const cancelButton = fromHtml(`
+        <button class="modal-btn" id="cancelMetadata">
+            Cancel
+        </button>
+    `);
+    const saveButton = fromHtml(`
+        <button class="modal-btn" id="saveMetadata">
+            Save
+        </button>
+    `);
+    modalWindow.querySelector(".modal-footer")?.append(cancelButton, saveButton);
     const closeWindow = () => modalWindow?.remove();
 
     const saveMetadata = async () => {
@@ -100,9 +92,8 @@ export function TagEditorElement({ file, tags, element }) {
             ui.updateWithMeta(file, element);
         }
     }
-    modalWindow.querySelector(".close-btn").addEventListener("click", () => closeWindow());
-    modalWindow.querySelector("#cancelMetadata").addEventListener("click", () => closeWindow());
+    cancelButton.addEventListener("click", () => closeWindow());
 
-    modalWindow.querySelector("#saveMetadata").addEventListener("click", () => saveMetadata());
+    saveButton.addEventListener("click", () => saveMetadata());
     return modalWindow;
 }

@@ -25,6 +25,7 @@ import { VideoElement } from "./js/elements/listItems/VideoItem.js";
 import { LIST_ITEM_TYPES } from "./js/enums/listItems.js";
 import { event } from "@tauri-apps/api";
 import { TagEditorElement } from "./js/elements/audioElements/tagsModalWindow.js";
+import { SearchWindowElement } from "./js/elements/windows/searchWindow.js";
 
 export class UI {
     listViewType = LIST_VIEW_TYPES.audio;
@@ -78,6 +79,7 @@ export class UI {
     initElements() {
         this.header = this.app.querySelector("#app-header");
         this.path = this.header.querySelector("#path");
+        this.listContainer = this.app.querySelector(".app-content");
         this.list = this.app.querySelector("#app-list");
 
         this.sidebar = this.app.querySelector("#app-sidebar");
@@ -319,24 +321,13 @@ export class UI {
                 break;
         }
     }
-    async search(value) {
-        // const url = `https://www.youtube.com/results?search_query=ABBA`;
-        let links = [];
-        for (let i = 1; i < 6; i++) {
-            const url = `https://spaces.im/ajax1772834143892/music-online/search/index/?Link_id=1527673&T=28&P=${i}&sq=${value}`;
-            const resp = await invoke("fetch_site", { url });
-            const contentHtml = JSON.parse(resp).content;
-            const content = fromHtml(`<div>${contentHtml}</div>`);
-            links = links.concat([...content.querySelectorAll(".list>.block")].map(el => {
-                const artist = el.querySelector("div")?.innerText.replace(/\:.*$/, "").trim();
-                const title = el.querySelector(".block div a")?.innerText;
-                const name = `${artist} – ${title}`;
-                const url = el.querySelector("div>a:nth-of-type(2)")?.href;
-                if (!url) return;
-                return ({ name, url, path: url, artist, title, fileType: "mp3", type: LIST_ITEM_TYPES.URL });
-            }).filter(el => el))
-        }
-        this.goto(GO_TO_DIRECTIONS.web_search, links);
+    async search(query) {
+        this.toggleLoadingScreen({ show: true });
+        this.listContainer.querySelectorAll(".modal").forEach(m => m.remove());
+        this.listContainer.append(await SearchWindowElement(query));
+        this.toggleLoadingScreen({ show: false });
+
+        // this.goto(GO_TO_DIRECTIONS.web_search, links);
         // this.showItems(links)
 
     }
@@ -508,11 +499,12 @@ export class UI {
 
     }
     addActiveFile(file, activity) {
+        console.log(file);
         this.activeFile = file;
         const folderPath = file?.path?.replace(/[\\\/][^\/\\]+$/, "");
-        const activeItems = this.list.querySelectorAll(`li.played`);
+        const activeItems = this.listContainer.querySelectorAll(`li.played`);
         activeItems.forEach(li => li.classList.remove("played"));
-        const activeElement = this.list.querySelector(`li[data-name="${file.name}"]`);
+        const activeElement = this.listContainer.querySelector(`li[data-path="${CSS.escape(file.path)}"]`);
         activeElement?.classList.add("played");
     }
     removeActiveFile(file) {
