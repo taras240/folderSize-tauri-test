@@ -76,7 +76,7 @@ pub fn set_metadata(path: String, metadata: Value) -> Result<(), String> {
             .get(key)?
             .as_str()
             .map(|s| s.trim().replace('\0', ""))
-            .filter(|s| !s.is_empty())
+        // .filter(|s: &String| !s.is_empty())
     };
 
     if let Some(v) = get("title") {
@@ -94,15 +94,19 @@ pub fn set_metadata(path: String, metadata: Value) -> Result<(), String> {
     if let Some(v) = get("genre") {
         tag.set_genre(&v);
     }
-
+    if let Some(v) = get("comment") {
+        tag.remove_comment();
+        tag.set_comment(v);
+    }
+    if let Some(v) = get("track") {
+        if let Ok(track) = v.parse::<u16>() {
+            tag.set_track_number(track);
+        }
+    }
     if let Some(v) = get("year") {
         if let Ok(year) = v.parse::<i32>() {
             tag.set_year(year);
         }
-    }
-
-    if let Some(v) = get("comment") {
-        tag.set_comment(v);
     }
 
     tag.write_to_path(&path).map_err(|e| e.to_string())?;
