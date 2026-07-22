@@ -1,6 +1,8 @@
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { fromHtml } from "../../functions/html.js";
 import { setMetaData } from "../../functions/metaData/metaData.js";
 import { ModalWindowElement } from "../windows/modalWindow.js";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 export function TagEditorElement({ file, tags, element }) {
     let { title, artist, album, genre, year, track, comment } = tags;
@@ -86,14 +88,20 @@ export function TagEditorElement({ file, tags, element }) {
             comment: modalWindow.querySelector("#metaComment")?.value ?? ""
         }
         const res = await setMetaData({ path: file.path, tags: newTags });
+
         console.log(newTags, res);
         if (!res) {
             closeWindow();
-            ui.updateWithMeta(file, element);
+            getCurrentWebview().emit("save-tags", {
+                file
+            });
+            getCurrentWindow().close();
+            // ui.updateWithMeta(file, element);
         }
     }
     cancelButton.addEventListener("click", () => closeWindow());
 
     saveButton.addEventListener("click", () => saveMetadata());
+    // return content;
     return modalWindow;
 }

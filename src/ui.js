@@ -26,6 +26,7 @@ import { LIST_ITEM_TYPES } from "./js/enums/listItems.js";
 import { event } from "@tauri-apps/api";
 import { TagEditorElement } from "./js/elements/audioElements/tagsModalWindow.js";
 import { SearchWindowElement } from "./js/elements/windows/searchWindow.js";
+import { openWidget } from "./js/functions/ui/openWidget.js";
 
 export class UI {
     listViewType = LIST_VIEW_TYPES.audio;
@@ -49,8 +50,12 @@ export class UI {
     async editMetaData({ file, element }) {
         ui.app.querySelectorAll(".modal").forEach(m => m.remove());
         const tags = await getMetaData(file);
-        const metadataModal = TagEditorElement({ file, tags, element });
-        ui.app.append(metadataModal);
+        // const metadataModal = TagEditorElement({ file, tags, element });
+        // ui.app.append(metadataModal);
+        openWidget("tags", {
+            file,
+            tags,
+        });
         // await invoke("set_metadata", {
         //     path: "D:\\1.mp3",
         //     metadata: {
@@ -428,7 +433,10 @@ export class UI {
         }
     }
     async updateWithMeta(file, element) {
-        if (!file || !element || file.type === LIST_ITEM_TYPES.URL) return;
+        if (!file || file.type === LIST_ITEM_TYPES.URL) return;
+        element ??= this.app.querySelector(`li[data-path="${CSS.escape(file.path)}"]`);
+        if (!element) return;
+        // const element = this.app.querySelector()
         const { path, name, normalizedName, normalizedSize, modifiedDate } = file;
         const meta = await getMetaData(file);
         const { artist, title, duration, album, year, bitrate } = meta;
