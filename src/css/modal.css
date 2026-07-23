@@ -49,6 +49,7 @@
 .modal-body {
     padding: 0 1rem;
     overflow: hidden;
+    overflow-y: auto;
 }
 
 .metadata-fields {

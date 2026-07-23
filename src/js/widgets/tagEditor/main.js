@@ -1,6 +1,7 @@
 import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { TagEditorElement } from "../../elements/audioElements/tagsModalWindow.js";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getMetaData } from "../../functions/metaData/metaData.js";
 export const appWindow = getCurrentWindow();
 
 await appWindow.setEffects({
@@ -10,9 +11,10 @@ await appWindow.setEffects({
 const webview = getCurrentWebview();
 const app = document.getElementById("app");
 
-function openTagEditor(props) {
+async function openTagEditor(file) {
     app.innerHTML = "";
-    const content = generateContent(props);
+    const tags = await getMetaData(file);
+    const content = generateContent({ tags, file });
     app.append(content);
 }
 
@@ -25,9 +27,8 @@ function generateContent({ tags, file }) {
 }
 
 webview.listen("load-widget", (event) => {
-    const { props } = event.payload;
-    console.log(props);
-    openTagEditor(props)
+    const { file } = event.payload;
+    openTagEditor(file)
 });
 
 webview.emit("widget-ready");

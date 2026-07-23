@@ -49,20 +49,9 @@ export class UI {
     }
     async editMetaData({ file, element }) {
         ui.app.querySelectorAll(".modal").forEach(m => m.remove());
-        const tags = await getMetaData(file);
-        // const metadataModal = TagEditorElement({ file, tags, element });
-        // ui.app.append(metadataModal);
         openWidget("tags", {
             file,
-            tags,
         });
-        // await invoke("set_metadata", {
-        //     path: "D:\\1.mp3",
-        //     metadata: {
-        //         artist: "Lama",
-        //         title: "Білі Вогні",
-        //     }
-        // });
     }
     async initConfig() {
         const config = await getConfig();

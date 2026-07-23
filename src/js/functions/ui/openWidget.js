@@ -9,7 +9,8 @@ export function openWidget(widgetName, props) {
             break;
     }
 }
-async function openTagEditor(data) {
+async function openTagEditor({ file }) {
+    await (await WebviewWindow.getByLabel("tags"))?.close();
     const win = new WebviewWindow(`tags`, {
         url: `/widgets/tag-editor/index.html`,
         title: "Tags Editor",
@@ -23,9 +24,8 @@ async function openTagEditor(data) {
         minimizable: false,
     });
     win.once("widget-ready", async () => {
-        console.log("ready", data);
         await win.emit("load-widget", {
-            props: data,
+            file,
         });
     });
 

@@ -9,7 +9,6 @@ export function TagEditorElement({ file, tags, element }) {
     const [parsedArtist, parsedTitle] = file.normalizedName?.split(" - ");
     artist ??= parsedArtist;
     title ??= parsedTitle;
-    console.log({ parsedArtist, parsedTitle });
 
     const modalWindow = ModalWindowElement({
         title: "Edit Metadata",
@@ -75,7 +74,12 @@ export function TagEditorElement({ file, tags, element }) {
         </button>
     `);
     modalWindow.querySelector(".modal-footer")?.append(cancelButton, saveButton);
-    const closeWindow = () => modalWindow?.remove();
+    const closeWindow = () => {
+
+        modalWindow?.remove();
+        getCurrentWindow()?.close();
+        getCurrentWebview()?.close();
+    }
 
     const saveMetadata = async () => {
         const newTags = {
@@ -89,19 +93,15 @@ export function TagEditorElement({ file, tags, element }) {
         }
         const res = await setMetaData({ path: file.path, tags: newTags });
 
-        console.log(newTags, res);
         if (!res) {
-            closeWindow();
             getCurrentWebview().emit("save-tags", {
                 file
             });
-            getCurrentWindow().close();
-            // ui.updateWithMeta(file, element);
+            closeWindow();
         }
     }
     cancelButton.addEventListener("click", () => closeWindow());
 
     saveButton.addEventListener("click", () => saveMetadata());
-    // return content;
     return modalWindow;
 }
