@@ -1,7 +1,7 @@
 import { AudioPlayerElement } from "./js/elements/audioElements/AudioPlayer.js";
 import { statusLine } from "./js/elements/controls.js";
 import { GO_TO_DIRECTIONS } from "./js/enums/gotoDirections.js";
-import { isAudio, isVideo } from "./js/functions/fileFormats.js";
+import { isAudio, isRetro, isVideo } from "./js/functions/fileFormats.js";
 import { fromHtml } from "./js/functions/html.js";
 import { doSizeCache, getDrives, getFolderItems } from "./js/functions/listFuncs.js";
 import { getMetaData } from "./js/functions/metaData/metaData.js";
@@ -134,6 +134,10 @@ export class UI {
             const userPath = await invoke("parse_env_path", { path: "%USERPROFILE%" });
             this.goto(userPath);
         });
+        $("#sidebar-roms").addEventListener("click", async () => {
+            const userPath = await invoke("parse_env_path", { path: "%USERPROFILE%\\Desktop\\retroGames\\ROMS" });
+            this.goto(userPath);
+        });
     }
 
     registerMediaSessionHandlers() {
@@ -144,14 +148,15 @@ export class UI {
     }
     toggleSortContextMenu(event) {
         event.stopPropagation();
-        const contextMenu = ContextMenu(Object.keys(SORT_NAMES).map(sortName => ({
-            type: "radio",
-            name: "sort-list",
-            isChecked: this.sortName === sortName,
-            label: sortName,
-            onChange: () => this.sortList(sortName),
-        })
-        ));
+        const contextMenu = ContextMenu(Object.keys(SORT_NAMES)
+            .map(sortName => ({
+                type: "radio",
+                name: "sort-list",
+                isChecked: this.sortName === sortName,
+                label: sortName,
+                onChange: () => this.sortList(sortName),
+            })
+            ));
         this.app.append(contextMenu);
         const rect = event.currentTarget.getBoundingClientRect();
         const position = { X: rect.left + rect.width / 2, Y: rect.top + rect.height };
@@ -159,29 +164,18 @@ export class UI {
     }
     toggleSwitchViewContextMenu(event) {
         event.stopPropagation();
-        const contextMenu = ContextMenu([
-            {
-                type: "radio",
-                name: "view-type",
-                isChecked: this.listViewType === LIST_VIEW_TYPES.files,
-                label: "Files View",
-                onChange: () => this.switchListView(LIST_VIEW_TYPES.files),
-            },
-            {
-                type: "radio",
-                name: "view-type",
-                isChecked: this.listViewType === LIST_VIEW_TYPES.video,
-                label: "Video View",
-                onChange: () => this.switchListView(LIST_VIEW_TYPES.video),
-            },
-            {
-                type: "radio",
-                name: "view-type",
-                isChecked: this.listViewType === LIST_VIEW_TYPES.audio,
-                label: "Audio View",
-                onChange: () => this.switchListView(LIST_VIEW_TYPES.audio),
-            }
-        ]);
+        const contextMenu = ContextMenu(
+            Object.values(LIST_VIEW_TYPES)
+                .map(type => {
+                    return {
+                        type: "radio",
+                        name: "view-type",
+                        isChecked: this.listViewType === type,
+                        label: type,
+                        onChange: () => this.switchListView(type),
+                    }
+                })
+        );
         this.app.append(contextMenu);
         const rect = event.currentTarget.getBoundingClientRect();
         const position = { X: rect.left + rect.width / 2, Y: rect.top + rect.height };
@@ -301,6 +295,7 @@ export class UI {
     }
     showItems(items) {
         items = this.sortItems(items);
+        this.list.classList.toggle("video-view", this.isVideoView);
         switch (this.listViewType) {
             case (LIST_VIEW_TYPES.files):
                 this._showFiles(items);
@@ -310,6 +305,9 @@ export class UI {
                 break;
             case (LIST_VIEW_TYPES.audio):
                 this._showAudio(items);
+                break;
+            case (LIST_VIEW_TYPES.retro):
+                this._showRetro(items);
                 break;
             default:
                 break;
@@ -326,7 +324,6 @@ export class UI {
 
     }
     _showFiles(items) {
-        this.list.classList.toggle("video-view", this.isVideoView);
         this.items = items;
         items.forEach((item) => {
             const itemElement = listElement(item);
@@ -410,7 +407,6 @@ export class UI {
     }
 
     async _showAudio(items) {
-        this.list.classList.toggle("video-view", this.isVideoView);
         items = items.filter(item => isAudio(item) || item.is_dir || item.is_drive || item.url);
         this.items = items;
         for (const item of items) {
@@ -418,6 +414,21 @@ export class UI {
             if (item.path === this.activeFile?.path) itemElement?.classList.add("played");
             if (isAudio(item)) await this.updateWithMeta(item, itemElement);
             itemElement && this.list.append(itemElement);
+            if (item.is_dir || item.is_drive) itemElement?.addEventListener("click", () => this.goto(item.path));
+        }
+    }
+    async _showRetro(items) {
+        items = items.filter(item => isRetro(item) || item.is_dir || item.is_drive || item.url);
+        this.items = items;
+        for (const item of items) {
+            const itemElement = listElement(item, LIST_VIEW_TYPES.retro);
+
+            // if (isRetro(item)) await this.updateWithMeta(item, itemElement);
+
+            if (itemElement) {
+                this.list.append(itemElement);
+            }
+
             if (item.is_dir || item.is_drive) itemElement?.addEventListener("click", () => this.goto(item.path));
         }
     }

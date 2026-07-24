@@ -11,6 +11,7 @@ export function sideBarElement() {
                     <div id="sidebar-user-videos" class="sidebar-element">Videos</div>
                     <div id="sidebar-user-pictures" class="sidebar-element">Pictures</div>
                     <div id="sidebar-user-docs" class="sidebar-element">Documents</div>
+                    <div id="sidebar-roms" class="sidebar-element">Roms</div>
                 </div>
             </aside>
         `)

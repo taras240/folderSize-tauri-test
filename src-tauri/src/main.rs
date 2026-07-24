@@ -3,6 +3,7 @@ mod modules;
 use modules::disks::*;
 use modules::metadata::*;
 use modules::net::*;
+use modules::rahashes::*;
 use std::collections::HashMap;
 use std::{env, fs, path::Path, time::UNIX_EPOCH};
 use trash::delete;
@@ -249,7 +250,8 @@ fn main() {
             get_metadata,
             set_metadata,
             parse_env_path,
-            calc_folder_sizes
+            calc_folder_sizes,
+            get_ra_hash,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -13,6 +13,7 @@ import { FolderElement } from "./listItems/FolderItem.js";
 import { AudioElement } from "./listItems/AudioItem.js";
 import { VideoElement } from "./listItems/VideoItem.js";
 import { AudioUriElement } from "./listItems/UriItem.js";
+import { RetroElement } from "./listItems/RetroItem.js";
 
 
 
@@ -27,6 +28,8 @@ export const listElement = (item, listViewType) => {
                 return AudioElement(item);
             if (listViewType === LIST_VIEW_TYPES.video)
                 return VideoElement(item);
+            if (listViewType === LIST_VIEW_TYPES.retro)
+                return RetroElement(item);
             return FileElement(item, listViewType);
         case LIST_ITEM_TYPES.FOLDER:
             return FolderElement(item, listViewType);

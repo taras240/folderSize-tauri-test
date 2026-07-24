@@ -6,3 +6,7 @@ export const isVideo = ({ fileType }) => {
     const videoFormatsArray = ["mp4"];
     return videoFormatsArray.includes(fileType?.toLowerCase());
 }
+export const isRetro = ({ fileType }) => {
+    const retroFormatsArray = ["nes", "smc", "sfc"];
+    return retroFormatsArray.includes(fileType?.toLowerCase());
+}

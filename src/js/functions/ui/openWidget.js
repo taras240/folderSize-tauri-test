@@ -1,8 +1,9 @@
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { ui } from "../../../main.js";
+import { WIDGET_TYPES } from "../../enums/widgetTypes.js";
 export function openWidget(widgetName, props) {
     switch (widgetName) {
-        case ("tags"):
+        case (WIDGET_TYPES.tags):
             openTagEditor(props);
             break;
         default:
@@ -10,9 +11,9 @@ export function openWidget(widgetName, props) {
     }
 }
 async function openTagEditor({ file }) {
-    await (await WebviewWindow.getByLabel("tags"))?.close();
-    const win = new WebviewWindow(`tags`, {
-        url: `/widgets/tag-editor/index.html`,
+    await (await WebviewWindow.getByLabel(WIDGET_TYPES.tags))?.close();
+    const win = new WebviewWindow(WIDGET_TYPES.tags, {
+        url: `/widgets/index.html`,
         title: "Tags Editor",
         decorations: false,
         transparent: true,
@@ -25,6 +26,7 @@ async function openTagEditor({ file }) {
     });
     win.once("widget-ready", async () => {
         await win.emit("load-widget", {
+            type: WIDGET_TYPES.tags,
             file,
         });
     });
