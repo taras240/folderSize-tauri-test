@@ -27,6 +27,7 @@ import { event } from "@tauri-apps/api";
 import { TagEditorElement } from "./js/elements/audioElements/tagsModalWindow.js";
 import { SearchWindowElement } from "./js/elements/windows/searchWindow.js";
 import { openWidget } from "./js/functions/ui/openWidget.js";
+import { raBadgeHtml } from "./js/elements/listItems/components/badges.js";
 
 export class UI {
     listViewType = LIST_VIEW_TYPES.audio;
@@ -135,7 +136,7 @@ export class UI {
             this.goto(userPath);
         });
         $("#sidebar-roms").addEventListener("click", async () => {
-            const userPath = await invoke("parse_env_path", { path: "%USERPROFILE%\\Desktop\\retroGames\\ROMS" });
+            const userPath = await invoke("parse_env_path", { path: "%USERPROFILE%\\Desktop\\retroGames" });
             this.goto(userPath);
         });
     }
@@ -418,18 +419,57 @@ export class UI {
         }
     }
     async _showRetro(items) {
-        items = items.filter(item => isRetro(item) || item.is_dir || item.is_drive || item.url);
+        this.controller?.abort(); // зупинити попередній запуск
+        this.controller = new AbortController();
+
+        const { signal } = this.controller;
+        items = items.filter(item =>
+            isRetro(item) || item.is_dir || item.is_drive || item.url
+        );
         this.items = items;
+
         for (const item of items) {
+            if (signal.aborted) return;
+
             const itemElement = listElement(item, LIST_VIEW_TYPES.retro);
+            item.itemElement = itemElement;
+            this.list.append(itemElement);
 
-            // if (isRetro(item)) await this.updateWithMeta(item, itemElement);
-
-            if (itemElement) {
-                this.list.append(itemElement);
+            if (item.is_dir || item.is_drive) {
+                itemElement?.addEventListener("click", () => this.goto(item.path));
             }
+        }
+        for (const item of items) {
+            if (signal.aborted) return;
+            if (item.type === LIST_ITEM_TYPES.FILE) {
+                await this.updateWithRAData(item, item.itemElement);
+                if (signal.aborted) return;
+            }
+        }
+    }
 
-            if (item.is_dir || item.is_drive) itemElement?.addEventListener("click", () => this.goto(item.path));
+    async updateWithRAData(file, element) {
+        if (!file || file.type != LIST_ITEM_TYPES.FILE) return;
+        element ??= this.app.querySelector(`li[data-path="${CSS.escape(file.path)}"]`);
+        if (!element) return;
+        // const element = this.app.querySelector()
+        const { path, name, normalizedName, normalizedSize, modifiedDate } = file;
+        const meta = await getMetaData(file);
+        const titleElement = element?.querySelector(".list-item__title");
+        if (!meta) {
+            element.classList.add("red-bg");
+            titleElement.innerText = `❓ ${titleElement.innerText}`
+            return;
+        };
+        const { title, consoleName, id } = meta;
+
+        if (titleElement) {
+            titleElement.innerText = title;
+            element.prepend(fromHtml(raBadgeHtml()));
+            const classList = ["audio-badge"];
+            // element.querySelectorAll(".audio-badge").forEach(b => b.remove());
+
+            titleElement.title = name;
         }
     }
     async updateWithMeta(file, element) {

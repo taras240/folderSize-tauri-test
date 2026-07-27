@@ -10,4 +10,7 @@ export const fileTypeHtml = (type) => `
         <div class="list-item__file-type" >
             ${textBadgeHtml(type)}
         </div>
-    `
+    `;
+export const raBadgeHtml = () => `
+            <i class="ra-badge"></i>
+    `;

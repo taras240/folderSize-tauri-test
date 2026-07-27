@@ -1,18 +1,5 @@
-use serde::{Deserialize, Serialize};
-use std::path::Path;
-
 use audiotags::Tag;
-
-#[derive(Serialize, Deserialize)]
-pub struct Metadata {
-    title: Option<String>,
-    artist: Option<String>,
-    album: Option<String>,
-    duration: Option<f64>,
-    bitrate: Option<u32>,
-    genre: Option<String>,
-    year: Option<String>,
-}
+use std::path::Path;
 
 #[tauri::command]
 pub fn get_metadata(path: String) -> Result<serde_json::Value, String> {
@@ -54,7 +41,6 @@ fn new_empty_tag(tag_type: TagType) -> Box<dyn AudioTag + Send + Sync> {
         TagType::Id3v2 => Box::new(Id3v2Tag::default()),
         TagType::Mp4 => Box::new(Mp4Tag::default()),
         TagType::Flac => Box::new(FlacTag::default()),
-        _ => Box::new(Id3v2Tag::default()),
     }
 }
 

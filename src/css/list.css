@@ -36,6 +36,7 @@
 .folder__list-item {
     display: flex;
     flex-direction: row;
+    align-items: center;
     gap: 0.5rem;
     padding: 0.25rem 0.5rem;
     background-color: transparent;
@@ -122,6 +123,16 @@
     color: var(--font-color);
     border-radius: 2px;
     border: 1px solid transparent;
+    text-align: center;
+}
+
+.ra-badge {
+    background: url(../assets/icons/ra-icon.png);
+    background-position: 50%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 1.8rem;
+    height: 0.8rem;
 }
 
 .text-badge.audio-badge {
@@ -245,4 +256,8 @@
     right: 0rem;
     /* background: var(--main-color); */
     padding: 0.25rem;
+}
+
+.red-bg {
+    background: rgba(220, 20, 60, 0.39) !important;
 }

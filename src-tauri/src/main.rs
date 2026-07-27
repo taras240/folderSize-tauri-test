@@ -252,6 +252,8 @@ fn main() {
             parse_env_path,
             calc_folder_sizes,
             get_ra_hash,
+            get_zip_file_extension,
+            launch_retroarch,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
