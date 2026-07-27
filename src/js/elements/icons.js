@@ -12,6 +12,8 @@ export const iconsHtml = {
     videoLibrary: iconTemplate("video_library"),
     folderList: iconTemplate("folder_list"),
     fullFolder: iconTemplate("swap_folder"),
+    folder: iconTemplate("folder"),
+    drive: iconTemplate("drive"),
 
     play_audio: iconTemplate("play_audio"),
     next_audio: iconTemplate("next_audio"),

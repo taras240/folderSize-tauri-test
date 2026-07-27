@@ -8,8 +8,10 @@ const fileHtml = (item) => {
 
     const sizeClass = getSizeClass(size);
 
+    // ${fileTypeHtml(fileType)}
     return `
-        ${fileTypeHtml(fileType)}
+        <div class="list-item__column list-item__icon">${iconsHtml.folder}</div>
+        
         ${normalizedSize ? sizeHtml(normalizedSize, sizeClass) : ""}
         
 

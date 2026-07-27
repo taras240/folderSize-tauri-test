@@ -465,6 +465,7 @@ export class UI {
 
         if (titleElement) {
             titleElement.innerText = `${title}`;
+            element.querySelector(".list-item__file-type")?.remove();
             element.prepend(fromHtml(raBadgeHtml()));
             const classList = ["audio-badge"];
             // element.querySelectorAll(".audio-badge").forEach(b => b.remove());

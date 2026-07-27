@@ -30,7 +30,8 @@ export function getRASystemID({ fileType, path }) {
 
         // Sega
         sms: 11,
-        gg: 15,
+        gg: 15, //gamegear
+        sg: 33, //sega-1000
 
         md: 1,
         gen: 1,
@@ -43,8 +44,8 @@ export function getRASystemID({ fileType, path }) {
         // Sony
         pbp: 41, //psp
         cso: 41,
-        // iso: 41,
-
+        iso: 21,//ps2
+        chd: 21,
         bin: 12,//ps1
 
         // Atari
@@ -127,6 +128,7 @@ export function getRASystemID({ fileType, path }) {
 
         // Watara
         wsv: 63,
+        sv: 63,
 
         // Sharp X1
         x1: 64,
@@ -151,7 +153,20 @@ export function getRASystemID({ fileType, path }) {
 
         // Uzebox
         uze: 80,
+
+        col: 44, //colecoVision
+
+        tvc: 75,// elector
+
+        int: 45, //inteliviosion
+
+        d88: 47, // 8000/8800
+
+        vec: 46, //vectrex
+
+        cdi: 77, //jaguar cd
+
     };
 
-    return map[fileType?.toLowerCase()] ?? "";
+    return map[fileType?.toLowerCase()] ?? null;
 }

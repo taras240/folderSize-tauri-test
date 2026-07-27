@@ -31,7 +31,7 @@ const retroFileHtml = (item) => {
 }
 export const RetroElement = (item, listViewType = LIST_VIEW_TYPES.retro) => {
     if (!isRetro(item)) return;
-    const { name, size, modified, readonly, hidden, path, fileType } = item;
+    let { name, size, modified, readonly, hidden, path, fileType } = item;
     const li = document.createElement("li");
     li.dataset.type = LIST_ITEM_TYPES.FILE;
     li.classList.add("folder__list-item");
@@ -55,14 +55,18 @@ export const RetroElement = (item, listViewType = LIST_VIEW_TYPES.retro) => {
         }
         const system = getRASystemID({ fileType }).toString();
         if (!system) return;
-        // retroarchPath: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RetroArch\\retroarch.exe"
+        // hash = await invoke("get_ra_hash", {
+        //     path,
+        //     system,
+        // })
+        // console.log({ system, hash });
+
         try {
-            hash = await invoke("launch_retroarch", {
+            await invoke("launch_retroarch", {
                 gamePath: item.path,
                 path: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RetroArch\\retroarch.exe",
             })
 
-            console.log({ hash });
         } catch (e) {
             console.log(e)
         }

@@ -41,6 +41,14 @@
     mask-image: url(../assets/icons/folder_swap.svg);
 }
 
+.folder-icon {
+    mask-image: url(../assets/icons/folder.svg);
+}
+
+.drive-icon {
+    mask-image: url(../assets/icons/drive.svg);
+}
+
 .video_library-icon {
     mask-image: url(../assets/icons/video_library.svg);
 
