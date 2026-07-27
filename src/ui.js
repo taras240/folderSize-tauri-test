@@ -461,14 +461,16 @@ export class UI {
             titleElement.innerText = `❓ ${titleElement.innerText}`
             return;
         };
-        const { title, consoleName, id } = meta;
+        const { title, console, id } = meta;
 
         if (titleElement) {
-            titleElement.innerText = title;
+            titleElement.innerText = `${title}`;
             element.prepend(fromHtml(raBadgeHtml()));
             const classList = ["audio-badge"];
             // element.querySelectorAll(".audio-badge").forEach(b => b.remove());
-
+            element.append(
+                itemBadge({ text: console, classList }),
+            )
             titleElement.title = name;
         }
     }

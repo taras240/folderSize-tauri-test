@@ -9,12 +9,10 @@ import { iconsHtml } from "../icons.js";
 
 const retroFileHtml = (item) => {
     const { name, normalizedName, is_dir, is_file, is_symlink, size, normalizedSize, modifiedDate, readonly, hidden, type, fileType } = item;
-
+    // <div class="list-item__column list-item__date text-badge">${normalizedSize}</div>
     return `
             ${fileTypeHtml(fileType)}
-            <div class="list-item__column list-item__date text-badge">${normalizedSize}</div>
             <div class="list-item__column list-item__title">${normalizedName}</div>
-            
             <div class="list-item__space"></div>
             <div class="list-item__column list-item__button-container delete-button">
                 <button class="list-item__button delete-button">

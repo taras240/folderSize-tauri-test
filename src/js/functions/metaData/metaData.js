@@ -19,16 +19,17 @@ export const getMetaData = async (file) => {
     if (isRetro(file)) {
         isWorking = true;
         let { fileType, path } = file;
-        if (fileType === "zip") {
-            fileType = await invoke("get_zip_file_extension", {
-                path
-            })
-        }
-        const system = await getRASystemID({ fileType }) + "";
+
         if (!hashes) {
             hashes = await fetch("/all-hashes.json").then(resp => resp.json());
         }
         try {
+            if (fileType === "zip") {
+                fileType = await invoke("get_zip_file_extension", {
+                    path
+                })
+            }
+            const system = await getRASystemID({ fileType }) + "";
             const hash = await invoke("get_ra_hash", {
                 path: file.path,
                 system,
@@ -38,6 +39,7 @@ export const getMetaData = async (file) => {
             return meta;
         } catch (e) {
             console.log(e);
+            return false;
         }
     }
 
