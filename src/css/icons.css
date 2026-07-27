@@ -90,6 +90,11 @@
     mask-image: url(../assets/icons/radio.svg);
 }
 
+input:not(:checked)+.radio-icon {
+    opacity: 0;
+    mask-image: url(../assets/icons/checkmark.svg);
+}
+
 input:checked+.radio-icon {
-    mask-image: url(../assets/icons/radio_filled.svg);
+    mask-image: url(../assets/icons/checkmark.svg);
 }

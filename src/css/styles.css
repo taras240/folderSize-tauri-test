@@ -13,7 +13,7 @@
 
 
 :root {
-  --main-color: #f5f5f5;
+  --main-color: #fff;
   --secondary-color: #f0f0f0;
   --font-color: black;
   --accent-color: rgb(15, 108, 189);
@@ -25,6 +25,7 @@
   --folder-bg: rgba(251, 255, 182, 0.2);
   --folder-bg-even: rgba(251, 255, 182, 0.6);
   --file-bg-even: rgba(109, 109, 109, 0.1);
+  --shadow-color: rgba(115, 115, 115, 0.2);
   /* --main-color: #ffffff;
   --font-color: rgb(24, 24, 24);
   --accent-color: rgb(15, 108, 189);
@@ -47,6 +48,7 @@
     --hover-button-background: rgba(255, 255, 255, 0.11);
     --folder-bg: rgba(251, 255, 182, 0.1);
     --folder-bg-even: rgba(251, 255, 182, 0.2);
+    --shadow-color: rgba(0, 0, 0, 0.2);
   }
 }
 
