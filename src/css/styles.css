@@ -170,7 +170,16 @@ input.header-control {
 
 .search-input.header-control {
   font-size: 1rem;
-  flex: 1;
+  /* flex: 1; */
+}
+
+.search-input:focus {
+  border: 1px solid var(--active-color);
+}
+
+.search-input::placeholder {
+  text-transform: capitalize;
+  text-align: center;
 }
 
 .status-line {

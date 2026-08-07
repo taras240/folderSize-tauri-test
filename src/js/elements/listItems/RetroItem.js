@@ -6,6 +6,10 @@ import { deletePath } from "../../functions/listFuncs.js";
 import { fileTypeHtml } from "./components/badges.js";
 import { getRASystemID } from "../../functions/metaData/raSystem.js";
 import { iconsHtml } from "../icons.js";
+import { ContextMenu, setPosition } from "../contextMenu/contextMenu.js";
+import { SORT_NAMES } from "../../functions/filesSort.js";
+import { ui } from "../../../main.js";
+import { CONTEXT_ITEM_TYPES } from "../../enums/contextMenuItemTypes.js";
 
 const retroFileHtml = (item) => {
     const { name, normalizedName, is_dir, is_file, is_symlink, size, normalizedSize, modifiedDate, readonly, hidden, type, fileType } = item;
@@ -46,34 +50,54 @@ export const RetroElement = (item, listViewType = LIST_VIEW_TYPES.retro) => {
         }
     });
     li.addEventListener("dblclick", async (event) => {
-        let hash;
-        if (fileType === "zip") {
-            fileType = await invoke("get_zip_file_extension", {
-                path
-            })
-            console.warn(fileType);
-        }
-        const system = getRASystemID({ fileType }).toString();
-        if (!system) return;
-        // hash = await invoke("get_ra_hash", {
-        //     path,
-        //     system,
-        // })
-        // console.log({ system, hash });
-
-        try {
-            await invoke("launch_retroarch", {
-                gamePath: item.path,
-                path: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RetroArch\\retroarch.exe",
-            })
-
-        } catch (e) {
-            console.log(e)
-        }
-
+        openWithRetroarch(item);
     });
     li.addEventListener("contextmenu", async (event) => {
         event.preventDefault();
+        const menu = ContextMenu(contextMenu(item));
+        ui.app.append(menu);
+        const rect = event.currentTarget.getBoundingClientRect();
+        const position = { X: event.x, Y: event.y };
+        setPosition({ element: menu, position, event });
     });
     return li;
 }
+export const openWithRetroarch = async (item) => {
+    let { fileType } = item;
+    if (fileType === "zip") {
+        fileType = await invoke("get_zip_file_extension", {
+            path
+        })
+        console.warn(fileType);
+    }
+    const system = getRASystemID(item).toString();
+    if (!system) return;
+    /* 
+        let hash = await invoke("get_ra_hash", {
+            path,
+            system,
+        })
+        console.log({ system, hash });
+    */
+
+    try {
+        await invoke("launch_retroarch", {
+            gamePath: item.path,
+            path: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RetroArch\\retroarch.exe",
+        })
+
+    } catch (e) {
+        console.log(e)
+    }
+}
+const contextMenu = (item) => [
+    {
+        label: "Open with Retroarch",
+        type: CONTEXT_ITEM_TYPES.button,
+        onClick: () => openWithRetroarch(item),
+    }, {
+        label: "Open with RANes",
+        type: CONTEXT_ITEM_TYPES.button,
+        onClick: () => openWithRANes(item),
+    }
+];

@@ -170,3 +170,14 @@ export function getRASystemID({ fileType, path }) {
 
     return map[fileType?.toLowerCase()] ?? null;
 }
+
+// redump - [43,77,40,16,56,76,49,12,21,39,9,19,]
+// / 3do,jaguar cd, dreamcast, gamecube,neogeo cd,pc-eng cd, pc-fx, ps1,ps2,saturn,sega cd, wii
+// dsk - [37,38] / CPC,apple2,
+// zip - [27,] / Arcade
+// bin - [73,57,74,23,69] / Arcadia 2001,fairchild f,vc4000,mo2,megaduck
+// rom - [17,29] / jaguar(some), msx
+
+// iso - [41] / psp , ps2
+
+// DSi --??????

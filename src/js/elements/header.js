@@ -29,8 +29,12 @@ const headerControls = () => {
     const searchInput = TextInputElement({
         classList: ["header-control", "search-input"],
         placeholder: "search",
-        onChange: (event) => ui.search(event.currentTarget.value)
+        isSearch: true,
+        onInput: (event) => ui.search(event.currentTarget.value)
     });
+    const spacebar = fromHtml(`
+            <div class="list-item__space"></div>
+        `)
     controls.append(
         backButton,
         controlButtons.forward({ id: "control-forvard" }),
@@ -42,6 +46,7 @@ const headerControls = () => {
         controlButtons.folderSize({ id: "control-show-size" }),
         controlButtons.fullFolder({ id: "control-show-all-files" }),
         controlButtons.videoLibrary({ id: "control-switch-view" }),
+        spacebar,
         searchInput,
     )
     return controls;

@@ -24,9 +24,12 @@
 
 .video-item {
     height: fit-content;
+    /* max-height: 70%; */
     width: 100%;
+    overflow: hidden;
     /* display: inline; */
 }
+
 
 .scroll-sentinel {
     position: absolute;
@@ -62,6 +65,10 @@
     background-color: var(--selection-color) !important;
     border-left: 3px solid var(--accent-color);
 
+}
+
+.folder__list-item.selected {
+    background: var(--selection-color);
 }
 
 .folder__list-item.played .list-item__title {
@@ -223,6 +230,13 @@
 .list__video-container {
     border-radius: 5px 5px 0 0;
     width: 100%;
+    aspect-ratio: 9/16;
+    flex: 1 1;
+}
+
+.list__video-container.loaded {
+    height: fit-content;
+    aspect-ratio: unset;
 }
 
 .folder__list-item.video-item {
@@ -246,6 +260,7 @@
     white-space: nowrap;
     color: var(--font-color);
     background-color: var(--main-color);
+    flex: 0 1;
 }
 
 .list__video-buttons {

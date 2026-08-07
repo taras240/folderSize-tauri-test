@@ -6,7 +6,7 @@ import { getMetaData } from "../../functions/metaData/metaData.js";
 
 export async function openTagEditor({ app, file }) {
     app.innerHTML = "";
-    const tags = await getMetaData(file);
+    const tags = await getMetaData(file, { isAudio: true });
     const content = generateContent({ tags, file });
     app.append(content);
 }

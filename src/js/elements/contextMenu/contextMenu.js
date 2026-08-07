@@ -1,11 +1,8 @@
 import { event } from "@tauri-apps/api";
 import { fromHtml } from "../../functions/html.js"
 import { iconsHtml, InputIcons } from "../icons.js";
-export const CONTEXT_ITEM_TYPES = {
-    checkbox: "checkbox",
-    radio: "radio",
-    button: "button"
-}
+import { CONTEXT_ITEM_TYPES } from "../../enums/contextMenuItemTypes.js";
+
 export const setPosition = ({ element, position, event }) => {
     if (!position) {
         position = {
@@ -45,6 +42,8 @@ const MenuItem = (item) => {
     switch (item.type) {
         case (CONTEXT_ITEM_TYPES.radio):
             return ItemContainer(RadioButton(item));
+        case (CONTEXT_ITEM_TYPES.button):
+            return ItemContainer(Button(item));
         default:
             break;
 
@@ -74,4 +73,14 @@ const RadioButton = ({ label, name, isChecked, onChange }) => {
     });
 
     return radioContainer;
+}
+const Button = ({ label, onClick, }) => {
+    const button = fromHtml(`
+        <button class="context-btn">${label}</button>
+    `);
+    button.addEventListener("click", (event) => {
+        onClick?.();
+        event.target.closest(".context-menu")?.remove();
+    });
+    return button;
 }

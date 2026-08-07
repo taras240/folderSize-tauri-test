@@ -7,6 +7,9 @@ import { deletePath } from "../../functions/listFuncs.js";
 import { fileHtml } from "../listItems.js";
 import { fileTypeHtml } from "./components/badges.js";
 import { getMetaData } from "../../functions/metaData/metaData.js";
+import { CONTEXT_ITEM_TYPES } from "../../enums/contextMenuItemTypes.js";
+import { openWithRetroarch } from "./RetroItem.js";
+import { ContextMenu, setPosition } from "../contextMenu/contextMenu.js";
 
 const audioFileHtml = (item) => {
     const { name, normalizedName, is_dir, is_file, is_symlink, size, normalizedSize, modifiedDate, readonly, hidden, type, fileType } = item;
@@ -19,29 +22,54 @@ const audioFileHtml = (item) => {
 export const AudioElement = (item, listViewType = LIST_VIEW_TYPES.files) => {
     if (!isAudio(item)) return;
     const { name, size, modified, readonly, hidden, path, fileType } = item;
-    const li = document.createElement("li");
-    li.dataset.type = LIST_ITEM_TYPES.FILE;
-    li.classList.add("folder__list-item");
-    li.dataset.name = name;
-    li.dataset.path = path;
-    li.dataset.size = size;
-    li.innerHTML = audioFileHtml(item);
-    li.addEventListener("click", async (event) => {
+    const element = document.createElement("li");
+    element.dataset.type = LIST_ITEM_TYPES.FILE;
+    element.classList.add("folder__list-item");
+    element.dataset.name = name;
+    element.dataset.path = path;
+    element.dataset.size = size;
+    element.innerHTML = audioFileHtml(item);
+    element.addEventListener("click", async (event) => {
+        ui.clearSelection();
         if (event.target.closest(".delete-button")) {
             event.stopPropagation();
-            await deletePath({ path, onDeleted: () => li.remove() });
+            await deletePath({ path, onDeleted: () => element.remove() });
         }
         else {
             ui.startPlayer(item);
         }
     });
-    li.addEventListener("dblclick", async (event) => {
+    element.addEventListener("dblclick", async (event) => {
         console.log(isAudio(item), item);
         ui.startPlayer(item);
     });
-    li.addEventListener("contextmenu", async (event) => {
+    element.addEventListener("contextmenu", async (event) => {
         event.preventDefault();
-        ui.editMetaData({ element: li, file: item });
+        ui.clearSelection();
+        ui.addSelection({ element, file: item });
+        const menu = ContextMenu(contextMenu(item, element));
+        ui.app.append(menu);
+        const rect = event.currentTarget.getBoundingClientRect();
+        const position = { X: event.x, Y: event.y };
+        setPosition({ element: menu, position, event });
+
+        menu.addEventListener("click", () => ui.clearSelection());
     });
-    return li;
+    item.element = element;
+    return element;
 }
+const contextMenu = (item, element) => [
+    {
+        label: "Edit Metadata",
+        type: CONTEXT_ITEM_TYPES.button,
+        onClick: () => ui.editMetaData({ file: item }),
+    },
+    {
+        label: "Delete",
+        type: CONTEXT_ITEM_TYPES.button,
+        onClick: async () => await deletePath({
+            path: item.path,
+            onDeleted: () => element?.remove()
+        }),
+    }
+];

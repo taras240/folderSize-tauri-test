@@ -14,7 +14,6 @@ import { fromHtml } from "./functions/html.js";
 export class Player {
     isShuffle = false;
     getCurrentlyPlayed() {
-        console.log(this.playlistIndex, this.playlist, this.playlist?.[this.playlistIndex])
         return this.playlist?.[this.playlistIndex];
     }
     getCurrentFolderPath() {
@@ -167,7 +166,7 @@ export class Player {
         folderPath ??= filePath?.replace(/[\\\/][^\/\\]+$/, "");
 
         const folderItems = filesList || await getFolderItems(folderPath);
-        const playlist = folderItems.filter(item => isAudio(item)).sort((a, b) => b.size - a.size);
+        const playlist = folderItems.filter(item => isAudio(item));
         this.playlist = playlist;
     }
     async openFile(file, filesList) {
@@ -197,7 +196,7 @@ export class Player {
         const updateIntervalMS = 1000;
         this.updateProgressInterval && clearInterval(this.updateProgressInterval);
 
-        const meta = await getMetaData(file);
+        const meta = await getMetaData(file, { isAudio: true });
         const { title, artist } = meta;
         const duration = this.audio.duration;
 

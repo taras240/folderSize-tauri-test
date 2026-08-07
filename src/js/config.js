@@ -2,15 +2,19 @@ import { Store } from '@tauri-apps/plugin-store';
 
 // Створення store
 let store = null;
+let config;
+let metaStore = null;
 
 // Ініціалізація store
 async function initStore() {
     if (!store) {
         store = await Store.load('settings.json');
     }
-    return store;
+    if (!metaStore) {
+        metaStore = await Store.load("library.json");
+    }
+    return { store, metaLibrary: metaStore };
 }
-let config;
 
 export async function saveSettingProperty({ property, value }) {
     if (!store) await initStore();
@@ -51,10 +55,19 @@ async function clearAll() {
 // Отримати всі ключі
 async function getAllKeys() {
     const keys = await store.keys();
-    console.log(keys);
 }
 
-// // Слухати зміни
-// const unlisten = await store.onKeyChange('theme', (newValue) => {
-//     console.log('Theme changed to:', newValue);
-// });
+
+
+export async function getMetaLibrary() {
+    if (!metaStore) await initStore();
+    return metaStore;
+}
+export async function pushToMetaLibrary(hash, props) {
+    // metaStore[hash] ??= {};
+    metaStore.set(hash, props);
+    metaStore.save();
+}
+export async function getFromMetaLibrary(hash) {
+    return await metaStore.get(hash);
+}

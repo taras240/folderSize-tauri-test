@@ -28,6 +28,7 @@ import { TagEditorElement } from "./js/elements/audioElements/tagsModalWindow.js
 import { SearchWindowElement } from "./js/elements/windows/searchWindow.js";
 import { openWidget } from "./js/functions/ui/openWidget.js";
 import { raBadgeHtml } from "./js/elements/listItems/components/badges.js";
+import { CONTEXT_ITEM_TYPES } from "./js/enums/contextMenuItemTypes.js";
 
 export class UI {
     listViewType = LIST_VIEW_TYPES.audio;
@@ -35,7 +36,6 @@ export class UI {
     forwardHistory = [];
     pathHistory = [];
     curPath = GO_TO_DIRECTIONS.home;
-    isVideoView = false;
     constructor() {
         this.app = document.getElementById("app");
         this.generateUI();
@@ -83,6 +83,7 @@ export class UI {
 
     }
     addEvents() {
+        this.app.addEventListener("contextmenu", event => event.preventDefault())
         this.app.addEventListener("click", () => removeContextMenus());
         const $ = (selector) => this.app.querySelector(selector);
 
@@ -151,7 +152,7 @@ export class UI {
         event.stopPropagation();
         const contextMenu = ContextMenu(Object.keys(SORT_NAMES)
             .map(sortName => ({
-                type: "radio",
+                type: CONTEXT_ITEM_TYPES.radio,
                 name: "sort-list",
                 isChecked: this.sortName === sortName,
                 label: sortName,
@@ -169,7 +170,7 @@ export class UI {
             Object.values(LIST_VIEW_TYPES)
                 .map(type => {
                     return {
-                        type: "radio",
+                        type: CONTEXT_ITEM_TYPES.radio,
                         name: "view-type",
                         isChecked: this.listViewType === type,
                         label: type,
@@ -183,11 +184,9 @@ export class UI {
         setPosition({ element: contextMenu, position, event });
     }
     switchListView(view) {
-        // this.isVideoView = !this.isVideoView;
         this.listViewType = view;
         this.openFolder(this.curPath);
         saveSettingProperty({ property: "listViewType", value: view })
-        // console.log("isVideo: ", this.isVideoView)
     }
     sortList(sortName) {
         this.sortName = sortName;
@@ -271,7 +270,6 @@ export class UI {
 
     async openFolder(path, isFullFolder = false) {
         path ??= GO_TO_DIRECTIONS.home;
-        this.list.innerHTML = "";
         this.path.value = path;
         appWindow.setTitle(`[ ${path} ]`);
         let items = [];
@@ -283,20 +281,20 @@ export class UI {
         else {
             items = await getFolderItems(path, this.sizeCache, isFullFolder);
         }
+        items = this.sortItems(items);
+        this.items = items;
         this.toggleLoadingScreen({ show: false });
 
         this.showItems(items);
     }
     openWeb(items) {
         path ??= GO_TO_DIRECTIONS.web_search;
-        this.list.innerHTML = "";
         this.path.value = "WEB SEARCH";
         appWindow.setTitle('WEB SEARCH');
         this.showItems(items);
     }
     showItems(items) {
-        items = this.sortItems(items);
-        this.list.classList.toggle("video-view", this.isVideoView);
+        this.list.innerHTML = "";
         switch (this.listViewType) {
             case (LIST_VIEW_TYPES.files):
                 this._showFiles(items);
@@ -315,17 +313,23 @@ export class UI {
         }
     }
     async search(query) {
-        this.toggleLoadingScreen({ show: true });
-        this.listContainer.querySelectorAll(".modal").forEach(m => m.remove());
-        this.listContainer.append(await SearchWindowElement(query));
-        this.toggleLoadingScreen({ show: false });
+        const searchItems = this.items.filter(item => {
+            const regex = new RegExp(`(${query})|${query.split(" ").join(".*")}`, "i");
+            // console.log(item.name, regex, regex.test(item.name));
+            const meta = Object.values(item.meta ?? {}).join(" ");
+            return regex.test(item.name) || regex.test(meta);
+        })
+        this.showItems(searchItems);
+        // this.toggleLoadingScreen({ show: true });
+        // this.listContainer.querySelectorAll(".modal").forEach(m => m.remove());
+        // this.listContainer.append(await SearchWindowElement(query));
+        // this.toggleLoadingScreen({ show: false });
 
         // this.goto(GO_TO_DIRECTIONS.web_search, links);
         // this.showItems(links)
 
     }
     _showFiles(items) {
-        this.items = items;
         items.forEach((item) => {
             const itemElement = listElement(item);
             if (item.path === this.activeFile?.path) itemElement?.classList.add("played");
@@ -337,15 +341,13 @@ export class UI {
     _showVideos(items) {
         const videoListContainer = fromHtml(`<div class="video-view"></div>`);
         this.list.append(videoListContainer);
-
         items = items.filter(item => isVideo(item) || item.is_dir || item.is_drive);
         this.items = items;
-
         let currentIndex = 0;
         const itemsPerLoad = 20;
         let sentinel = null;
 
-        const loadMoreItems = () => {
+        const loadMoreItems = async () => {
             if (currentIndex >= items.length) return;
 
             const endIndex = Math.min(currentIndex + itemsPerLoad, items.length);
@@ -357,11 +359,13 @@ export class UI {
 
             for (let i = currentIndex; i < endIndex; i++) {
                 const item = items[i];
-                const itemElement = item.is_dir ? listElement(item) : VideoElement(item);
+
+                const itemElement = (item.type === "file") ? VideoElement(item) : listElement(item);
                 if (!itemElement) continue;
                 videoListContainer.append(itemElement);
-                if (item.is_dir || item.is_drive) itemElement.addEventListener("click", () => this.goto(item.path));
-                if (!item.is_dir && !item.is_drive) {
+                if (item.type !== "file") itemElement.addEventListener("click", () => this.goto(item.path));
+                if (item.type === "file") {
+                    const meta = await getMetaData(item, { isVideo: true });
                     const video = itemElement.querySelector('video');
                     if (video) {
                         videoObserver.observe(video);
@@ -382,23 +386,30 @@ export class UI {
         const videoObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 const video = entry.target;
-                if (entry.isIntersecting) video.play().catch(() => { });
+                if (entry.isIntersecting) {
+                    video.play().catch(() => { });
+                }
                 else video.pause();
             });
         }, { threshold: 0.6 });
 
         const lazyLoadObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const video = entry.target;
-                    if (video.dataset.src) {
-                        video.src = video.dataset.src;
-                        video.load();
-                        delete video.dataset.src;
-                    }
+                if (!entry.isIntersecting) return;
+
+                const video = entry.target;
+
+                if (video.dataset.src) {
+                    video.addEventListener("loadeddata", () => {
+                        video.classList.add("loaded");
+                    }, { once: true });
+
+                    video.src = video.dataset.src;
+                    video.load();
+                    delete video.dataset.src;
                 }
             });
-        }, { rootMargin: '200px' });
+        }, { rootMargin: "200px" });
 
         const scrollObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => { if (entry.isIntersecting) loadMoreItems(); });
@@ -409,7 +420,7 @@ export class UI {
 
     async _showAudio(items) {
         items = items.filter(item => isAudio(item) || item.is_dir || item.is_drive || item.url);
-        this.items = items;
+        // this.items = items;
         for (const item of items) {
             const itemElement = listElement(item, this.listViewType);
             if (item.path === this.activeFile?.path) itemElement?.classList.add("played");
@@ -426,7 +437,7 @@ export class UI {
         items = items.filter(item =>
             isRetro(item) || item.is_dir || item.is_drive || item.url
         );
-        this.items = items;
+        // this.items = items;
 
         for (const item of items) {
             if (signal.aborted) return;
@@ -454,7 +465,7 @@ export class UI {
         if (!element) return;
         // const element = this.app.querySelector()
         const { path, name, normalizedName, normalizedSize, modifiedDate } = file;
-        const meta = await getMetaData(file);
+        const meta = await getMetaData(file, { isRetro: true });
         const titleElement = element?.querySelector(".list-item__title");
         if (!meta) {
             element.classList.add("red-bg");
@@ -481,7 +492,8 @@ export class UI {
         if (!element) return;
         // const element = this.app.querySelector()
         const { path, name, normalizedName, normalizedSize, modifiedDate } = file;
-        const meta = await getMetaData(file);
+        const meta = await getMetaData(file, { isAudio: true });
+        file.meta = meta;
         const { artist, title, duration, album, year, bitrate } = meta;
         const normalizedDuration = formatSongDuration(duration);
         const titleElement = element?.querySelector(".list-item__title");
@@ -506,7 +518,7 @@ export class UI {
 
     }
     sortItems(items) {
-        if (this.isVideoView) {
+        if (this.sortName === SORT_NAMES.shuffle) {
             return shuffle(items);
         }
         return items.sort((a, b) => sortBy[this.sortName || SORT_NAMES.size](a, b)).sort((a, b) => sortBy.isDir(a, b));
@@ -550,7 +562,6 @@ export class UI {
 
     }
     addActiveFile(file, activity) {
-        console.log(file);
         this.activeFile = file;
         const folderPath = file?.path?.replace(/[\\\/][^\/\\]+$/, "");
         const activeItems = this.listContainer.querySelectorAll(`li.played`);
@@ -561,6 +572,19 @@ export class UI {
     removeActiveFile(file) {
         if (this.activeFile && (file?.path !== this.activeFile?.path)) {
             delete this.activeFile;
+        }
+    }
+    selectedFilesList = [];
+    clearSelection() {
+        this.selectedFilesList
+            .forEach(el => el.classList.remove("selected"));
+        this.selectedFilesList = [];
+    }
+    addSelection({ element, file }) {
+        element ??= this.list.querySelector(`li[data-path="${file?.path}"]`);
+        if (element) {
+            element.classList.add("selected");
+            this.selectedFilesList.push(element);
         }
     }
 }

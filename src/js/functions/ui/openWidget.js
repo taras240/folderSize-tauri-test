@@ -13,7 +13,7 @@ export function openWidget(widgetName, props) {
 async function openTagEditor({ file }) {
     await (await WebviewWindow.getByLabel(WIDGET_TYPES.tags))?.close();
     const win = new WebviewWindow(WIDGET_TYPES.tags, {
-        url: `/widgets/index.html`,
+        url: `/widgets/widget.html`,
         title: "Tags Editor",
         decorations: false,
         transparent: true,

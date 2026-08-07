@@ -5,26 +5,34 @@ export const sortBy = {
 
         return sizeB - sizeA;
     },
-    isDir: (a, b) => b.is_dir - a.is_dir,
-    fileName: (a, b) => b.name - a.name,
+    isDir: (a, b) => {
+        if (b.is_dir && a.is_dir) return a.name.localeCompare(b.name);
+        return b.is_dir - a.is_dir;
+    },
+    fileName: (a, b) => a.name.localeCompare(b.name),
     modified: (a, b) => {
         return b.modified - a.modified
     },
     created: (a, b) => {
-        console.log(new Date(a.created), new Date(a.modified))
         return b.created - a.created
-    }
+    },
+    shuffle: (a, b) => {
+        return Math.round(Math.random() * 2 - 1)
+    },
+
 }
 export const SORT_NAMES = {
     size: "size",
     fileName: "fileName",
     modified: "modified",
     created: "created",
+    shuffle: "shuffle",
 }
 export function shuffle(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    return arr;
+
+    return arr.sort(sortBy.isDir);
 }

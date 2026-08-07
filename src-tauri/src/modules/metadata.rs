@@ -1,4 +1,6 @@
 use audiotags::Tag;
+use audiotags::{AudioTag, FlacTag, Id3v2Tag, Mp4Tag, TagType};
+use serde_json::Value;
 use std::path::Path;
 
 #[tauri::command]
@@ -17,9 +19,6 @@ pub fn get_metadata(path: String) -> Result<serde_json::Value, String> {
         "comment": tag.comment(),
     }))
 }
-
-use audiotags::{AudioTag, FlacTag, Id3v2Tag, Mp4Tag, TagType};
-use serde_json::Value;
 
 fn guess_tag_type(path: &str) -> TagType {
     match Path::new(path)

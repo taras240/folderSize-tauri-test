@@ -1,8 +1,8 @@
 import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
-import { WIDGET_TYPES } from "../../src/js/enums/widgetTypes.js";
-import { openTagEditor } from "../../src/js/widgets/tagEditor/main.js";
+import { WIDGET_TYPES } from "/src/js/enums/widgetTypes.js";
+import { openTagEditor } from "/src/js/widgets/tagEditor/main.js";
 
 const appWindow = getCurrentWindow();
 const webview = getCurrentWebview();

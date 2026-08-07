@@ -1,13 +1,13 @@
 import { invoke } from '@tauri-apps/api/core';
 import { LIST_ITEM_TYPES } from '../../enums/listItems.js';
-import { isAudio, isRetro } from '../fileFormats.js';
 import { getRASystemID } from './raSystem.js';
+import { getFromMetaLibrary, pushToMetaLibrary } from '../../config.js';
 let hashes;
 let isWorking = false;
 let query = [];
-export const getMetaData = async (file) => {
+export const getMetaData = async (file, { isVideo, isAudio, isRetro } = {}) => {
     if (file.type === LIST_ITEM_TYPES.URL) return file;
-    if (isAudio(file)) {
+    if (isAudio) {
         try {
             const meta = await invoke("get_metadata", file);
             return meta;
@@ -16,7 +16,19 @@ export const getMetaData = async (file) => {
             return {};
         }
     }
-    if (isRetro(file)) {
+    if (isVideo) {
+        try {
+            const hash = await invoke("hash_file", { path: file.path });
+            // const meta = await invoke("get_metadata", file);
+            console.log(await getFromMetaLibrary(hash));
+            ;
+            return hash;
+        } catch (e) {
+            console.log(e);
+            return {};
+        }
+    }
+    if (isRetro) {
         isWorking = true;
         let { fileType, path } = file;
 

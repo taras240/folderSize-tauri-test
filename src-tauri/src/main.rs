@@ -234,7 +234,48 @@ fn delete_path_to_trash(path: String) -> Result<(), String> {
     delete(path).map_err(|e| e.to_string())?;
     Ok(())
 }
+use std::{
+    fs::File,
+    io::{Read, Seek, SeekFrom},
+};
 
+use blake3::Hasher;
+
+#[tauri::command]
+fn hash_file(path: &str) -> Result<String, String> {
+    const CHUNK: usize = 64 * 1024;
+
+    let mut file = File::open(path).map_err(|e| e.to_string())?;
+    let size = file.metadata().map_err(|e| e.to_string())?.len();
+
+    let mut hasher = Hasher::new();
+    hasher.update(&size.to_le_bytes());
+
+    let mut buf = vec![0u8; CHUNK];
+
+    // Початок
+    let n = file.read(&mut buf).map_err(|e| e.to_string())?;
+    hasher.update(&buf[..n]);
+
+    // Середина
+    if size > CHUNK as u64 * 2 {
+        file.seek(SeekFrom::Start(size / 2))
+            .map_err(|e| e.to_string())?;
+        let n = file.read(&mut buf).map_err(|e| e.to_string())?;
+        hasher.update(&buf[..n]);
+    }
+
+    // Кінець
+    if size > CHUNK as u64 {
+        file.seek(SeekFrom::End(-(CHUNK as i64)))
+            .map_err(|e| e.to_string())?;
+        let n = file.read(&mut buf).map_err(|e| e.to_string())?;
+        hasher.update(&buf[..n]);
+    }
+
+    let hash = hasher.finalize().to_hex();
+    Ok(hash[..32].to_string())
+}
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_window_state::Builder::default().build())
@@ -254,6 +295,7 @@ fn main() {
             get_ra_hash,
             get_zip_file_extension,
             launch_retroarch,
+            hash_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { resolve } from "path";
 
 export default defineConfig({
     // Очищає консоль при перезапуску
@@ -18,6 +19,13 @@ export default defineConfig({
     envPrefix: ['VITE_', 'TAURI_'],
 
     build: {
+        rollupOptions: {
+            input: {
+                main: resolve(__dirname, "index.html"),
+                widget: resolve(__dirname, "widgets/widget.html"),
+                // інші віджети...
+            }
+        },
         // Таргет для Tauri
         target: 'chrome105',
 
