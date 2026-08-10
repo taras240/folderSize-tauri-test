@@ -5,7 +5,8 @@ import { LIST_VIEW_TYPES } from "../../enums/listViews.js";
 import { isAudio } from "../../functions/fileFormats.js";
 import { fromHtml } from "../../functions/html.js";
 import { fileHtml } from "../listItems.js";
-import { fileTypeHtml } from "./components/badges.js";
+import { fileTypeHtml, textBadgeHtml } from "./components/badges.js";
+import { formatSongDuration } from "../../functions/timeFormat.js";
 function sanitizeFileName(name) {
     return name
         .replace(/[<>:"/\\|?*\x00-\x1F]/g, "") // заборонені символи та керуючі символи
@@ -13,11 +14,13 @@ function sanitizeFileName(name) {
         .trim();
 }
 const audioUrlHtml = (item) => {
-    const { name, artist, channel, title } = item;
+    const { name, artist, channel, title, duration } = item;
+    const normalizedDuration = formatSongDuration(duration);
     return `
         ${fileTypeHtml("url")}
         <div class="list-item__column list-item__title">${name || title}</div>
         <div class="list-item__space"></div>
+        ${textBadgeHtml(normalizedDuration)}
     `;
 }
 export const AudioUriElement = (item, listViewType = LIST_VIEW_TYPES.files) => {

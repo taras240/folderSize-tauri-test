@@ -14,7 +14,7 @@ export function TagEditorElement({ file, tags, element }) {
         title: "Edit Metadata",
         classList: ["metadata-modal"],
         id: "metadataModal",
-
+        withHeader: false,
     })
     const content = fromHtml(`
         <div class="metadata-fields">

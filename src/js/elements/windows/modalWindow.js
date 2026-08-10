@@ -1,13 +1,13 @@
 import { fromHtml } from "../../functions/html.js";
 
-export function ModalWindowElement({ title, classList = [], id, onClose }) {
+export function ModalWindowElement({ title, classList = [], id, onClose, withHeader = true }) {
     const window = fromHtml(`
         <div class="modal ${classList.join(" ")}" id="${id ?? Number(Math.random() * 1e6)}">
             <div class="modal-content">
-                <div class="modal-header">
+                ${withHeader ? `<div class="modal-header">
                     <h2>${title}</h2>
                     <button class="close-btn">&times;</button>
-                </div>
+                </div>` : ""}
                 <div class="modal-body"></div>
                 <div class="modal-footer"></div>
             </div>

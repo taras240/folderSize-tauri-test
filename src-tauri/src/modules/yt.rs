@@ -88,9 +88,10 @@ pub async fn youtube_audio_url(
 
     let (yt_dlp_path, ffmpeg_path, deno_path) = ensure_libraries(&libraries_dir).await?;
 
-    let libraries = yt_dlp::client::deps::Libraries::new(yt_dlp_path, ffmpeg_path);
+    let libraries = yt_dlp::client::deps::Libraries::new(yt_dlp_path.clone(), ffmpeg_path);
 
     let downloader = yt_dlp::Downloader::builder(libraries, libraries_dir.join("output"))
+        .with_cookies_from_browser("firefox")
         .build()
         .await
         .map_err(|e| format!("Downloader error: {e:?}"))?;
