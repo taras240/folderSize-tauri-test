@@ -13,15 +13,21 @@ function sanitizeFileName(name) {
         .trim();
 }
 const audioUrlHtml = (item) => {
-    const { name } = item;
+    const { name, artist, channel, title } = item;
     return `
         ${fileTypeHtml("url")}
-        <div class="list-item__column list-item__title">${name}</div>
+        <div class="list-item__column list-item__title">${name || title}</div>
         <div class="list-item__space"></div>
     `;
 }
 export const AudioUriElement = (item, listViewType = LIST_VIEW_TYPES.files) => {
-    const { name, url, title, artist, fileType } = item;
+    const getYTAudioUrl = async (item) => {
+        const audioUrl = (await invoke("youtube_audio_url", { videoUrl: item.ytUrl }))?.url;
+        item.url = audioUrl;
+        item.path = audioUrl;
+        li.dataset.path = audioUrl;
+    }
+    const { name, url, title, artist, fileType, ytUrl } = item;
     const li = document.createElement("li");
     li.dataset.type = LIST_ITEM_TYPES.FILE;
     li.classList.add("folder__list-item");
@@ -31,17 +37,24 @@ export const AudioUriElement = (item, listViewType = LIST_VIEW_TYPES.files) => {
     li.innerHTML = audioUrlHtml(item);
     const dwnButton = fromHtml(`<button> ⬇️  </button>`);
     dwnButton.addEventListener("click", async (event) => {
-        const downloadsPath = await invoke("parse_env_path", { path: "%USERPROFILE%\\Downloads" });
         dwnButton.innerText = " ⏳ ";
+        if (!item.url && item.ytUrl) {
+            await getYTAudioUrl(item);
+        }
+        const downloadsPath = await invoke("parse_env_path", { path: "%USERPROFILE%\\Downloads" });
+        console.log(`dwn: ${item.url}`)
         await invoke("download_file", {
-            url,
-            path: `${downloadsPath}\\${sanitizeFileName(name)}.${fileType}`,
+            url: item.url,
+            path: `${downloadsPath}\\${sanitizeFileName(name || title)}.${fileType}`,
         });
         dwnButton.innerText = " ✅  ";
         dwnButton.addEventListener("click", () => { })
     })
     li.append(dwnButton);
     li.addEventListener("click", async (event) => {
+        if (!item.url && item.ytUrl) {
+            await getYTAudioUrl(item);
+        }
         ui.startPlayer(item);
     });
     li.addEventListener("dblclick", async (event) => {

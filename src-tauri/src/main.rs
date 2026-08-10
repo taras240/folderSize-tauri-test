@@ -4,6 +4,7 @@ use modules::disks::*;
 use modules::metadata::*;
 use modules::net::*;
 use modules::rahashes::*;
+use modules::yt::*;
 use std::collections::HashMap;
 use std::{env, fs, path::Path, time::UNIX_EPOCH};
 use trash::delete;
@@ -296,6 +297,8 @@ fn main() {
             get_zip_file_extension,
             launch_retroarch,
             hash_file,
+            youtube_search,
+            youtube_audio_url
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

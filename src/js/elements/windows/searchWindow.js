@@ -22,7 +22,26 @@ async function spacesSearch(query) {
     }
     return links;
 }
-
+async function ytSearch(query) {
+    let results = await invoke("youtube_search", { query, limit: 30 });
+    results = results.map(item => {
+        return {
+            ...item,
+            artist: item.channel,
+            ytUrl: item.url,
+            url: null,
+            type: LIST_ITEM_TYPES.URL,
+            fileType: "m4a",
+        }
+    })
+    return results;
+    //      channel: "Марія Гайова"
+    //      duration:  221
+    //      id: "LsMvBf-qiBo"
+    //      thumbnail: null
+    //      title:  "#NK-#почуття ( cover Mari Gayova)  #річниця #почуття #свято #музичне_привітання #вітання"
+    //      url: "https://www.youtube.com/watch?v=LsMvBf-qiBo"
+}
 export async function SearchWindowElement(query) {
 
     const window = ModalWindowElement({
@@ -32,7 +51,8 @@ export async function SearchWindowElement(query) {
     const content = fromHtml(`
         <ul class="files-list"></ul>
     `);
-    const links = await spacesSearch(query);
+    const links = await ytSearch(query);
+    console.log(links);
     content.append(...links.map(link => listElement(link)));
     window.querySelector(".modal-body").append(content);
     return window;

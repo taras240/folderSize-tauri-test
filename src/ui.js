@@ -313,17 +313,17 @@ export class UI {
         }
     }
     async search(query) {
-        const searchItems = this.items.filter(item => {
-            const regex = new RegExp(`(${query})|${query.split(" ").join(".*")}`, "i");
-            // console.log(item.name, regex, regex.test(item.name));
-            const meta = Object.values(item.meta ?? {}).join(" ");
-            return regex.test(item.name) || regex.test(meta);
-        })
-        this.showItems(searchItems);
-        // this.toggleLoadingScreen({ show: true });
-        // this.listContainer.querySelectorAll(".modal").forEach(m => m.remove());
-        // this.listContainer.append(await SearchWindowElement(query));
-        // this.toggleLoadingScreen({ show: false });
+        // const searchItems = this.items.filter(item => {
+        //     const regex = new RegExp(`(${query})|${query.split(" ").join(".*")}`, "i");
+        //     // console.log(item.name, regex, regex.test(item.name));
+        //     const meta = Object.values(item.meta ?? {}).join(" ");
+        //     return regex.test(item.name) || regex.test(meta);
+        // })
+        // this.showItems(searchItems);
+        this.toggleLoadingScreen({ show: true });
+        this.listContainer.querySelectorAll(".modal").forEach(m => m.remove());
+        this.listContainer.append(await SearchWindowElement(query));
+        this.toggleLoadingScreen({ show: false });
 
         // this.goto(GO_TO_DIRECTIONS.web_search, links);
         // this.showItems(links)

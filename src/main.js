@@ -9,6 +9,10 @@ await appWindow.setEffects({
 });
 let originalSize = null;
 let isResizing = false;
+// invoke("youtube_audio_url", { videoUrl: "https://www.youtube.com/watch?v=_lvcoAKcvMQ" }).then(r => console.log(r));
+// invoke("youtube_search", { query: "почуття cover", limit: 10 }).then(r => console.log(r));
+
+
 const hideWebviewTitle = (appWindow) => {
     // Збережіть початковий розмір
     appWindow.innerSize().then(size => {

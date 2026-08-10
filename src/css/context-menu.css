@@ -51,6 +51,7 @@
     border-radius: 5px;
     text-transform: capitalize;
     background: transparent;
+    color: var(--font-color);
 }
 
 .context-btn:hover {
