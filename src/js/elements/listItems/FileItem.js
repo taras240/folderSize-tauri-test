@@ -2,6 +2,7 @@ import { ui } from "../../../main.js";
 import { LIST_ITEM_TYPES } from "../../enums/listItems.js";
 import { LIST_VIEW_TYPES } from "../../enums/listViews.js";
 import { isAudio } from "../../functions/fileFormats.js";
+import { normalizeHtml } from "../../functions/html.js";
 import { fromHtml } from "../../functions/html.js";
 import { deletePath } from "../../functions/listFuncs.js";
 import { getSizeClass } from "../../functions/metaData/normalizedSize.js";
@@ -17,15 +18,15 @@ const fileHtml = (item) => {
         ${normalizedSize ? sizeHtml(normalizedSize, sizeClass) : ""}
         
 
-        <div class="list-item__column list-item__title">${normalizedName}</div>
+        <.list-item__column.list-item__title>${normalizedName}</>
         
-        <div class="list-item__space"></div>
-        <div class="list-item__column list-item__date text-badge">${modifiedDate}</div>
-        <div class="list-item__column list-item__button-container delete-button">
-            <button class="list-item__button delete-button">
+        <.list-item__space/>
+        <.list-item__column.list-item__date.text-badge>${modifiedDate}</>
+        <.list-item__column.list-item__button-container.delete-button">
+            <button.list-item__button.delete-button>
                 ${iconsHtml.delete}
             </button>
-        </div>
+        </>
     `;
 }
 
@@ -37,7 +38,7 @@ export const FileElement = (item, listViewType = LIST_VIEW_TYPES.files) => {
     li.dataset.name = name;
     li.dataset.path = path;
     li.dataset.size = size;
-    li.innerHTML = fileHtml(item);
+    li.innerHTML = normalizeHtml(fileHtml(item));
 
     li.addEventListener("click", async (event) => {
         if (event.target.closest(".delete-button")) {

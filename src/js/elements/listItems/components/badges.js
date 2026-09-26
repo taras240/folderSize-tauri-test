@@ -1,3 +1,5 @@
+import { normalizeHtml } from "../../../functions/html.js";
+
 export const textBadgeHtml = (text) => `
         <i class="text-badge">${text}</i>
     `;
@@ -8,7 +10,7 @@ export const sizeHtml = (size, sizeClass, is_drive) => `
     `;
 export const fileTypeHtml = (type) => `
         <div class="list-item__file-type" >
-            ${textBadgeHtml(type)}
+            ${textBadgeHtml(type?.slice(0, 4) + (type?.length > 4 ? "." : ""))}
         </div>
     `;
 export const raBadgeHtml = () => `

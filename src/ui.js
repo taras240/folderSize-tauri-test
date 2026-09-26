@@ -38,13 +38,16 @@ export class UI {
     curPath = GO_TO_DIRECTIONS.home;
     constructor() {
         this.app = document.getElementById("app");
+        this.startApp();
+    }
+    async startApp() {
+        await this.initConfig();
         this.generateUI();
         this.initApp();
     }
     async initApp() {
         this.initElements();
         this.addEvents();
-        await this.initConfig();
         this.openFolder();
         this.player = new Player();
     }
@@ -55,14 +58,23 @@ export class UI {
         });
     }
     async initConfig() {
-        const config = await getConfig();
-        this.listViewType = config?.listViewType || LIST_VIEW_TYPES.files;
-        this.sortName = config?.sortName || SORT_NAMES.fileName;
+        this.config = await getConfig();
+        this.listViewType = this.config?.listViewType || LIST_VIEW_TYPES.files;
+        this.sortName = this.config?.sortName || SORT_NAMES.fileName;
     }
     generateUI() {
         this.app.innerHTML = "";
         const mainContent = mainContentElement();
-        mainContent.append(sideBarElement(), mainList());
+        const sidebarItems = this.config.sidebarItems;
+        const sidebar = sideBarElement({
+            sidebarItems,
+            onClick: async (path) => {
+                const musicPath = await invoke("parse_env_path", { path });
+                this.goto(musicPath);
+            }
+        })
+
+        mainContent.append(sidebar, mainList());
         this.app.append(
             // windowHeader(),
             headerElement(),
@@ -101,45 +113,7 @@ export class UI {
             // placeholder for future sort UI
         });
 
-        this.registerSidebarHandlers($);
         this.registerMediaSessionHandlers();
-
-
-
-    }
-    registerSidebarHandlers($) {
-        $("#sidebar-user-music").addEventListener("click", async () => {
-            const musicPath = await invoke("parse_env_path", { path: "%USERPROFILE%\\Music" });
-            this.goto(musicPath);
-        });
-        $("#sidebar-user-downloads").addEventListener("click", async () => {
-            const downloadsPath = await invoke("parse_env_path", { path: "%USERPROFILE%\\Downloads" });
-            this.goto(downloadsPath);
-        });
-        $("#sidebar-user-videos").addEventListener("click", async () => {
-            const videoPath = await invoke("parse_env_path", { path: "%USERPROFILE%\\Videos" });
-            this.goto(videoPath);
-        });
-        $("#sidebar-user-pictures").addEventListener("click", async () => {
-            const picsPath = await invoke("parse_env_path", { path: "%USERPROFILE%\\Pictures" });
-            this.goto(picsPath);
-        });
-        $("#sidebar-user-docs").addEventListener("click", async () => {
-            const docsPath = await invoke("parse_env_path", { path: "%USERPROFILE%\\Documents" });
-            this.goto(docsPath);
-        });
-        $("#sidebar-user-desktop").addEventListener("click", async () => {
-            const deskPath = await invoke("parse_env_path", { path: "%USERPROFILE%\\Desktop" });
-            this.goto(deskPath);
-        });
-        $("#sidebar-user-user").addEventListener("click", async () => {
-            const userPath = await invoke("parse_env_path", { path: "%USERPROFILE%" });
-            this.goto(userPath);
-        });
-        $("#sidebar-roms").addEventListener("click", async () => {
-            const userPath = await invoke("parse_env_path", { path: "%USERPROFILE%\\Desktop\\retroGames" });
-            this.goto(userPath);
-        });
     }
 
     registerMediaSessionHandlers() {
@@ -313,17 +287,17 @@ export class UI {
         }
     }
     async search(query) {
-        // const searchItems = this.items.filter(item => {
-        //     const regex = new RegExp(`(${query})|${query.split(" ").join(".*")}`, "i");
-        //     // console.log(item.name, regex, regex.test(item.name));
-        //     const meta = Object.values(item.meta ?? {}).join(" ");
-        //     return regex.test(item.name) || regex.test(meta);
-        // })
-        // this.showItems(searchItems);
-        this.toggleLoadingScreen({ show: true });
-        this.listContainer.querySelectorAll(".modal").forEach(m => m.remove());
-        this.listContainer.append(await SearchWindowElement(query));
-        this.toggleLoadingScreen({ show: false });
+        const searchItems = this.items.filter(item => {
+            const regex = new RegExp(`(${query})|${query.split(" ").join(".*")}`, "i");
+            // console.log(item.name, regex, regex.test(item.name));
+            const meta = Object.values(item.meta ?? {}).join(" ");
+            return regex.test(item.name) || regex.test(meta);
+        })
+        this.showItems(searchItems);
+        // this.toggleLoadingScreen({ show: true });
+        // this.listContainer.querySelectorAll(".modal").forEach(m => m.remove());
+        // this.listContainer.append(await SearchWindowElement(query));
+        // this.toggleLoadingScreen({ show: false });
 
         // this.goto(GO_TO_DIRECTIONS.web_search, links);
         // this.showItems(links)
@@ -331,7 +305,7 @@ export class UI {
     }
     _showFiles(items) {
         items.forEach((item) => {
-            const itemElement = listElement(item);
+            const itemElement = listElement(item, LIST_VIEW_TYPES.files);
             if (item.path === this.activeFile?.path) itemElement?.classList.add("played");
             itemElement && this.list.append(itemElement);
             if (item.is_dir || item.is_drive) itemElement?.addEventListener("click", () => this.goto(item.path));
@@ -420,13 +394,19 @@ export class UI {
 
     async _showAudio(items) {
         items = items.filter(item => isAudio(item) || item.is_dir || item.is_drive || item.url);
+        const toMetaUpdateArray = [];
         // this.items = items;
         for (const item of items) {
             const itemElement = listElement(item, this.listViewType);
             if (item.path === this.activeFile?.path) itemElement?.classList.add("played");
-            if (isAudio(item)) await this.updateWithMeta(item, itemElement);
+            if (isAudio(item)) {
+                toMetaUpdateArray.push({ item, itemElement })
+            }
             itemElement && this.list.append(itemElement);
             if (item.is_dir || item.is_drive) itemElement?.addEventListener("click", () => this.goto(item.path));
+        }
+        for (const audioItem of toMetaUpdateArray) {
+            await this.updateWithMeta(audioItem);
         }
     }
     async _showRetro(items) {
@@ -486,29 +466,29 @@ export class UI {
             titleElement.title = name;
         }
     }
-    async updateWithMeta(file, element) {
-        if (!file || file.type === LIST_ITEM_TYPES.URL) return;
-        element ??= this.app.querySelector(`li[data-path="${CSS.escape(file.path)}"]`);
-        if (!element) return;
+    async updateWithMeta({ item, itemElement }) {
+        if (!item || item.type === LIST_ITEM_TYPES.URL) return;
+        itemElement ??= this.app.querySelector(`li[data-path="${CSS.escape(item.path)}"]`);
+        if (!itemElement) return;
         // const element = this.app.querySelector()
-        const { path, name, normalizedName, normalizedSize, modifiedDate } = file;
-        const meta = await getMetaData(file, { isAudio: true });
-        file.meta = meta;
+        const { path, name, normalizedName, normalizedSize, modifiedDate } = item;
+        const meta = await getMetaData(item, { isAudio: true });
+        item.meta = meta;
         const { artist, title, duration, album, year, bitrate } = meta;
         const normalizedDuration = formatSongDuration(duration);
-        const titleElement = element?.querySelector(".list-item__title");
+        const titleElement = itemElement?.querySelector(".list-item__title");
 
         if (titleElement) {
             const songName = artist && title ? `${artist} - ${title}` : `❓ ${normalizedName}`;
             titleElement.innerText = `${songName}`;
             const classList = ["audio-badge"];
-            element.querySelectorAll(".audio-badge").forEach(b => b.remove());
-            meta.duration && element.append(
+            itemElement.querySelectorAll(".audio-badge").forEach(b => b.remove());
+            meta.duration && itemElement.append(
                 itemBadge({ text: normalizedDuration, classList }),
                 itemBadge({ text: bitrate + "kbps", classList }),
 
             )
-            element.append(
+            itemElement.append(
                 itemBadge({ text: normalizedSize, classList }),
                 itemBadge({ text: modifiedDate, classList }),
             )

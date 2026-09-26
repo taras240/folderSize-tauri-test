@@ -1,18 +1,21 @@
 import { fromHtml } from "../functions/html.js";
 
-export function sideBarElement() {
-    return fromHtml(`
-            <aside id="app-sidebar" class="sidebar">
-                <div class="sidebar-container">
-                    <div id="sidebar-user-user" class="sidebar-element">User</div>
-                    <div id="sidebar-user-downloads" class="sidebar-element">Downloads</div>
-                    <div id="sidebar-user-desktop" class="sidebar-element">Desktop</div>
-                    <div id="sidebar-user-music" class="sidebar-element">Music</div>
-                    <div id="sidebar-user-videos" class="sidebar-element">Videos</div>
-                    <div id="sidebar-user-pictures" class="sidebar-element">Pictures</div>
-                    <div id="sidebar-user-docs" class="sidebar-element">Documents</div>
-                    <div id="sidebar-roms" class="sidebar-element">Roms</div>
-                </div>
-            </aside>
+export function sideBarElement({ sidebarItems, onClick }) {
+    const sidebar = fromHtml(`
+            <aside#app-sidebar.sidebar/>
         `)
+    const sidebarPathList = fromHtml(`<.sidebar-container/>`)
+    const pathElements = sidebarItems
+        .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+        .map(pathItem => {
+            const pathElement = fromHtml(`
+            <.sidebar-element>${pathItem.label}</>
+            `);
+            pathElement.addEventListener("click", (event) => onClick?.(pathItem.path));
+            return pathElement;
+        });
+
+    sidebarPathList.append(...pathElements);
+    sidebar.append(sidebarPathList);
+    return sidebar;
 }

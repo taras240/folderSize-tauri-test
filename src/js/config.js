@@ -33,7 +33,43 @@ async function loadSettings() {
     if (!store) await initStore();
 
     config = await store.get('config') ?? {};
-
+    config.sidebarItems ??= [
+        {
+            label: "User",
+            path: "%USERPROFILE%",
+            displayOrder: 0,
+        },
+        {
+            label: "Downloads",
+            path: "%USERPROFILE%\\Downloads",
+            displayOrder: 1,
+        },
+        {
+            label: "Desktop",
+            path: "%USERPROFILE%\\Desktop",
+            displayOrder: 2,
+        },
+        {
+            label: "Music",
+            path: "%USERPROFILE%\\Music",
+            displayOrder: 3,
+        },
+        {
+            label: "Videos",
+            path: "%USERPROFILE%\\Videos",
+            displayOrder: 4,
+        },
+        {
+            label: "Pictures",
+            path: "%USERPROFILE%\\Pictures",
+            displayOrder: 5,
+        },
+        {
+            label: "Documents",
+            path: "%USERPROFILE%\\Documents",
+            displayOrder: 6,
+        },
+    ]
     return config;
 }
 export async function getConfig() {

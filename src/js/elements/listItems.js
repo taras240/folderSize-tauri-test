@@ -19,7 +19,6 @@ import { RetroElement } from "./listItems/RetroItem.js";
 
 
 export const listElement = (item, listViewType) => {
-
     switch (item.type) {
         case LIST_ITEM_TYPES.DRIVE:
             return DriveElement(item, listViewType);
